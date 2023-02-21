@@ -1,16 +1,24 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
+import { useState } from "react";
+import reactLogo from "./assets/react.svg";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import "./App.css";
+
+import Home from "./pages/Home";
+import Lobby from "./pages/Lobby";
+import Game from "./pages/Game";
 
 function App() {
-
   return (
-    <div className="App">
-      <div className="text-3xl font-bold underline">
-        Hello world!
-      </div>
-    </div>
-  )
+    <>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/lobby/:id" element={<Lobby />} />
+          <Route path="/game/:id" element={<Game />} />
+        </Routes>
+      </BrowserRouter>
+    </>
+  );
 }
 
-export default App
+export default App;
