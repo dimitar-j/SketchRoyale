@@ -9,7 +9,7 @@ export const store = syncedStore({ todos: [] as Todo[] });
 
 // Create a document that syncs automatically using Y-WebRTC
 const doc = getYjsDoc(store);
-export const webrtcProvider = new WebrtcProvider("brian-testing1", doc, {signaling: ['wss://signaling.yjs.dev', 'wss://y-webrtc-signaling-eu.herokuapp.com', 'wss://y-webrtc-signaling-us.herokuapp.com'], password: "brian-password" });
+export const webrtcProvider = new WebrtcProvider("brian-testing1", doc, {signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'], password: "brian-password" });
 
 export const disconnect = () => webrtcProvider.disconnect();
 export const connect = () => webrtcProvider.connect();
