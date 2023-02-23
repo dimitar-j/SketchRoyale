@@ -51,7 +51,7 @@ function Lobby() {
       <div className="font-sans text-white text-xl">Game ID: {id}</div>
       {Card()}
       <button
-        className="bg-red p-4 font-display text-3xl text-white w-[100%] mt-4"
+        className="bg-red p-4 font-display text-3xl text-white w-full mt-4"
         onClick={startGame}
       >
         START GAME
