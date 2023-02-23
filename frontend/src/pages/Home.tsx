@@ -23,7 +23,7 @@ function Home() {
 
   const Banner = () => {
     return (
-      <div className="w-[50%] h-[100vh] bg-blue text-white p-24 flex flex-col justify-center gap-5 shadow-xl">
+      <div className="w-1/2 h-[100vh] bg-blue text-white p-24 flex flex-col justify-center gap-5">
         <div className="font-display text-8xl">Sketch Royale</div>
         <div className="font-sans text-2xl">
           Compete with your friends in this fun and challenging drawing game
@@ -37,7 +37,7 @@ function Home() {
 
   const Card = () => {
     return (
-      <div className="w-[50%] h-[100vh] bg-red flex justify-center items-center">
+      <div className="w-1/2 h-[100vh] bg-red flex justify-center items-center">
         <div className="bg-white rounded-lg flex felx-col p-8 h-fit flex-col gap-3 shadow-xl">
           <div className="font-display text-black text-4xl">Join Game</div>
           <input
@@ -72,7 +72,7 @@ function Home() {
   };
 
   return (
-    <div className="w-[100%] h-[100vh] flex">
+    <div className="w-full h-[100vh] flex">
       {Banner()}
       {Card()}
     </div>
