@@ -5,11 +5,11 @@ import { WebrtcProvider } from "y-webrtc";
 type Todo = { completed: boolean, title: string };
 
 // Create your SyncedStore store
-export const store = syncedStore({ todos: [] as Todo[] });
+export const store = syncedStore({todos: [] as Todo[] }); 
 
 // Create a document that syncs automatically using Y-WebRTC
 const doc = getYjsDoc(store);
-export const webrtcProvider = new WebrtcProvider("brian-testing1", doc, {signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'], password: "brian-password" });
+export const webrtcProvider = new WebrtcProvider("brian-testing2", doc, {signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'], password: "brian-password" });
 
 export const disconnect = () => webrtcProvider.disconnect();
 export const connect = () => webrtcProvider.connect();
