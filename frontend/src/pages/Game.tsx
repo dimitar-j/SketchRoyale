@@ -7,7 +7,7 @@ import SketchBox from "../components/SketchBox";
 
 function Game() {
   return (
-    <div className="bg-blue w-[100vw] h-[100vh] py-16 grid grid-cols-4 gap-4 relative">
+    <div className="bg-blue w-[100vw] h-[100vh] py-16 px-8 grid grid-cols-4 gap-4 relative">
       <Scores></Scores>
       <SketchBox></SketchBox>
       <Chat></Chat>

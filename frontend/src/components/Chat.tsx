@@ -27,7 +27,9 @@ function Chat() {
   };
   return (
     <div className="flex flex-col col-span-1">
-      <div className="font-display text-white text-4xl pl-2">Chat</div>
+      <div className="font-display text-white text-4xl pl-2 w-full text-center">
+        Chat
+      </div>
       <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between">
         <div className="flex flex-col gap-2">
           {EXAMPLE_CHATS.map((c, index) => (
