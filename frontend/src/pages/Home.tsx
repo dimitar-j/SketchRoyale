@@ -1,18 +1,29 @@
 import React, { useState } from "react";
 import hand from "../assets/hand.svg";
+import { useConnectionContext } from "../context/ConnectionContext";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
+  const { setUpRoomContext } = useConnectionContext();
+  const navigate = useNavigate();
 
   const joinGame = () => {
     const data = {
       gameId,
       username,
     };
-    console.log(data);
+    setUpRoomContext(data).then((res) => {
+      if (res == "Success") {
+        navigate("/lobby/" + gameId);
+      } else {
+        window.alert("There was an error connecting to the lobby. Please try again.")
+      }
+    });
     setGameId("");
     setUsername("");
+
   };
 
   const createGame = () => {
