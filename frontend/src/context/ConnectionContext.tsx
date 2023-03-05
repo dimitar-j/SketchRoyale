@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { createContext, useContext, useState } from "react"
 import { syncedStore, getYjsDoc } from "@syncedstore/core";
 import { WebrtcProvider } from "y-webrtc";
@@ -12,12 +13,8 @@ type ConnectionContextType = {
   setUpRoomContext: (data: {username:string, gameId: string}) => Promise<"Success" | "Fail">;
 }
 
-type Test = {
-  playerName: string
-}
-
 const connectionContext = createContext<ConnectionContextType>({} as ConnectionContextType);
-export const store = syncedStore({playerList: [] as Test[]});
+export const store = syncedStore({playerList: [], gameStatus: "text"});
 const doc = getYjsDoc(store);
 
 export function ConnectionContextProvider({ children }: Props) {
@@ -28,13 +25,12 @@ export function ConnectionContextProvider({ children }: Props) {
   async function setUpRoomContext(data: {username: string, gameId: string}) {
     setGameRoom(data.gameId);
     setUsername(data.username);
-    const webRtcProvider = new WebrtcProvider(gameRoom, doc, {
+    const webRtcProvider = new WebrtcProvider(data.gameId, doc, {
       signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'],
       password: "temp-game-password",
     });
-    const currPlayers = state.playerList.length
     const result = await connectToServer(addPlayer(data.username));
-    if ((result === "Done") && (state.playerList.length == currPlayers + 1)) {
+    if ((result === "Done")) {
       console.log("player added")
       return "Success";
     } else {
@@ -52,7 +48,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
   function addPlayer(username: string) {
     return (() => {
-      state.playerList.push({playerName: username});
+      state.playerList.push(username);
       console.log("player pushed")
       return "Done";
     });

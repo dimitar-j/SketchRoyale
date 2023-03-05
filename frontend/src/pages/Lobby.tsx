@@ -35,9 +35,6 @@ function Lobby() {
   };
  
   const state = useSyncedStore(store);
-  state.playerList.map((player, index) => {
-    console.log(player.playerName)
-  })
   
   const Card = () => {
     return (
@@ -48,7 +45,7 @@ function Lobby() {
             className="flex flex-row] border-b border-black py-4 gap-4 items-center"
           >
             <img src={Avatar} className=""></img>
-            <div className="font-san">{player.playerName}</div>
+            <div className="font-san">{player}</div>
           </div>
         ))}
       </div>
