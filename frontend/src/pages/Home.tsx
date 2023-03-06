@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import hand from "../assets/hand.svg";
 import { useConnectionContext } from "../context/ConnectionContext";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 function Home() {
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
+  const [hostname, setHostname] = useState("");
   const { setUpRoomContext } = useConnectionContext();
   const navigate = useNavigate();
 
@@ -26,10 +27,32 @@ function Home() {
 
   };
 
-  const createGame = () => {
+  async function generateGameId () {
+    var minm = 100000;
+    var maxm = 999999;
+    const id = Math.floor(Math
+    .random() * (maxm - minm + 1)) + minm;
+    console.log(id);
+    console.log(id.toString());
+    return id.toString();
+  }
+
+  const createGame = async () => {
+    const data = {
+      gameId: await generateGameId(),
+      username: hostname,
+    };
+    setUpRoomContext(data).then((res) => {
+      if (res == "Success") {
+        navigate("/lobby/" + data.gameId);
+      } else {
+        window.alert("There was an error connecting to the lobby. Please try again.")
+      }
+    });
     setGameId("");
-    setUsername("");
+    setHostname("");
     console.log("Creating Game");
+
   };
 
   const Banner = () => {
@@ -71,9 +94,16 @@ function Home() {
             JOIN
           </button>
           <div className="text-sans color-black text-center">or</div>
+          <input
+            placeholder="Username"
+            className="border-2 p-2 border-black focus:outline-blue focus:rounded-none"
+            value={hostname}
+            onChange={(e) => setHostname(e.target.value)}
+          ></input>
           <button
-            className="font-display bg-blue text-white p-2 text-xl"
+            className="font-display bg-blue text-white p-2 text-xl disabled:bg-gray-200 disabled:text-black transition duration-200"
             onClick={createGame}
+            disabled={hostname === ""}
           >
             CREATE GAME
           </button>

@@ -4,6 +4,7 @@ import React from "react";
 import { useParams } from "react-router-dom";
 import Avatar from "../assets/Avatar.svg";
 import { useConnectionContext, store } from "../context/ConnectionContext";
+import NavBar from "../components/NavBar";
 
 const EXAMPLE_PLAYERS = [
   "Brian",
@@ -57,6 +58,7 @@ function Lobby() {
   
   return (
     <div className="bg-blue w-[100vw] h-[100vh] px-10 lg:px-80 flex flex-col justify-center">
+      <NavBar />
       <div className="font-display text-white text-6xl">Lobby</div>
       <div className="font-sans text-white text-xl">Game ID: {id}</div>
       {Card()}
