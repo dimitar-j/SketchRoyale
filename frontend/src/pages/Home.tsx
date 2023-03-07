@@ -2,15 +2,22 @@ import React, { useState, useEffect } from "react";
 import hand from "../assets/hand.svg";
 import { useConnectionContext } from "../context/ConnectionContext";
 import { useNavigate } from "react-router-dom";
+import LoadingScreen from "../components/LoadingScreen";
 
 function Home() {
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
   const [hostname, setHostname] = useState("");
+  const [loading, setLoading] = useState(false);
   const { setUpRoomContext } = useConnectionContext();
   const navigate = useNavigate();
 
+  useEffect(() => {
+    console.log(`Loading: ${loading}`);
+  }, [loading]);
+
   const joinGame = () => {
+    setLoading(true);
     const data = {
       gameId,
       username,
@@ -38,6 +45,7 @@ function Home() {
   }
 
   const createGame = async () => {
+    setLoading(true);
     const data = {
       gameId: await generateGameId(),
       username: hostname,
@@ -52,7 +60,6 @@ function Home() {
     setGameId("");
     setHostname("");
     console.log("Creating Game");
-
   };
 
   const Banner = () => {
@@ -113,8 +120,9 @@ function Home() {
   };
 
   return (
+    loading ? <LoadingScreen /> :  
     <div className="w-full h-[100vh] flex">
-      {Banner()}
+      {Banner()} 
       {Card()}
     </div>
   );
