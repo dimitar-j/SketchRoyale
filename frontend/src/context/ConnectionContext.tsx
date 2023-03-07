@@ -27,7 +27,7 @@ export function ConnectionContextProvider({ children }: Props) {
     setUsername(data.username);
     const webRtcProvider = new WebrtcProvider(data.gameId, doc, {
       signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'],
-      password: "temp-game-password",
+      // password: "temp-game-password",
     });
     const result = await connectToServer(addPlayer(data.username));
     if ((result === "Done")) {
