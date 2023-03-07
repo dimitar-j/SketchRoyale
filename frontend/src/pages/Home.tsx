@@ -27,6 +27,7 @@ function Home() {
         navigate("/lobby/" + gameId);
       } else {
         window.alert("There was an error connecting to the lobby. Please try again.")
+        setLoading(false);
       }
     });
     setGameId("");
@@ -55,6 +56,7 @@ function Home() {
         navigate("/lobby/" + data.gameId);
       } else {
         window.alert("There was an error connecting to the lobby. Please try again.")
+        setLoading(false);
       }
     });
     setGameId("");
