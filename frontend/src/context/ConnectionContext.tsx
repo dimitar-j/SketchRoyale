@@ -34,8 +34,8 @@ export function ConnectionContextProvider({ children }: Props) {
 
   const setupRoomContext = (data: { username: string, gameId: string }) => {
     // connect to websocket
-    // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
-    const newWs = new WebSocket("ws://localhost:8080");
+    const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
+    // const newWs = new WebSocket("ws://localhost:8080");
     newWs.onopen = () => {
       console.log("connected");
       setWs(newWs);
