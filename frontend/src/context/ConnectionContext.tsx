@@ -15,6 +15,7 @@ type serverResponse = {
 type ConnectionContextType = {
   setupRoomContext: (data: {username: string, gameId: string}) => void;
   localGameState: serverResponse;
+  resetLocalVars: () => void;
 };
 
 const connectionContext = createContext<ConnectionContextType>({} as ConnectionContextType);
@@ -27,12 +28,14 @@ export function ConnectionContextProvider({ children }: Props) {
     gameState: "", 
     chatMessages: []
   });
+  const [ws, setWs] = useState<WebSocket | null>(null);
 
   const setupRoomContext = (data: { username: string, gameId: string }) => {
     // connect to websocket
     const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
     newWs.onopen = () => {
       console.log("connected");
+      setWs(newWs);
 
       const joinMessage = {
         type: 'join',
@@ -53,8 +56,21 @@ export function ConnectionContextProvider({ children }: Props) {
     }
   }
 
+  const resetLocalVars = () => {
+    setLocalGameState({
+      gameId: 0,
+      host: "",
+      players: [{username: ""}],
+      gameState: "",
+      chatMessages: []
+    });
+    if (ws){
+      ws.close();
+    }
+  }
+
   return (
-    <connectionContext.Provider value={{ setupRoomContext, localGameState }}>
+    <connectionContext.Provider value={{ setupRoomContext, localGameState, resetLocalVars }}>
       {children}
     </connectionContext.Provider>
   )
