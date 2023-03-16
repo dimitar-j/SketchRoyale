@@ -19,6 +19,9 @@ wss.on('connection', function connection(ws) {
         console.log('incoming chat message');
         handleChat(data, ws);
         break;
+      case 'close':
+        console.log("incoming close message");
+        handleClose(data, ws);
     }
   });
 });
@@ -30,7 +33,7 @@ function updateAllPlayers(gameId) {
       message: {
         gameId: gameId,
         host: gameRooms[gameId].host,
-        players: gameRooms[gameId].players.map(({username}) => ({username})),
+        players: gameRooms[gameId].players.map(({ username }) => ({ username })),
         gameState: gameRooms[gameId].gameState,
         chatMessages: gameRooms[gameId].chatMessages
       }
@@ -49,3 +52,21 @@ function handleJoin(data, ws) {
   gameRooms[gameId].players.push({ username: username, ws: ws });
   updateAllPlayers(gameId);
 };
+
+function handleClose(data, ws) {
+  gameRooms[data.message.gameId].players.map((curr_player, index) => {
+    console.log(curr_player.username, index);
+    if (curr_player.username === data.message.username) {
+      gameRooms[data.message.gameId].players.splice(index, 1);
+    }
+  })
+  updateAllPlayers(data.message.gameId);
+}
+
+
+
+
+
+
+
+

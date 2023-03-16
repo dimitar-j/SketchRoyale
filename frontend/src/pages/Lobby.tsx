@@ -1,16 +1,23 @@
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Avatar from "../assets/Avatar.svg";
 import { useConnectionContext } from "../context/ConnectionContext";
 import NavBar from "../components/NavBar";
 
 function Lobby() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { localGameState } = useConnectionContext(); 
   const startGame = () => {
     console.log("START GAME");
   };
  
+  useEffect(() => {
+    if (localGameState.gameId == 0){
+      navigate("/");
+    }
+  }, [localGameState])
   
   const Card = () => {
     console.log(localGameState);

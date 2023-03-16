@@ -7,13 +7,13 @@ interface Props {
 type serverResponse = {
   gameId: number,
   host: string,
-  players: [{username: string}],
+  players: [{ username: string }],
   gameState: string,
   chatMessages: []
 };
 
 type ConnectionContextType = {
-  setupRoomContext: (data: {username: string, gameId: string}) => void;
+  setupRoomContext: (data: { username: string, gameId: string }) => void;
   localGameState: serverResponse;
   resetLocalVars: () => void;
 };
@@ -23,19 +23,24 @@ const connectionContext = createContext<ConnectionContextType>({} as ConnectionC
 export function ConnectionContextProvider({ children }: Props) {
   const [localGameState, setLocalGameState] = useState<serverResponse>({
     gameId: 0,
-    host: "", 
-    players: [{username: ""}], 
-    gameState: "", 
+    host: "",
+    players: [{ username: "" }],
+    gameState: "",
     chatMessages: []
   });
   const [ws, setWs] = useState<WebSocket | null>(null);
+  const [gameId, setGameId] = useState("");
+  const [username, setUsername] = useState("");
 
   const setupRoomContext = (data: { username: string, gameId: string }) => {
     // connect to websocket
-    const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
+    // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
+    const newWs = new WebSocket("ws://localhost:8080");
     newWs.onopen = () => {
       console.log("connected");
       setWs(newWs);
+      setGameId(data.gameId);
+      setUsername(data.username);
 
       const joinMessage = {
         type: 'join',
@@ -47,6 +52,10 @@ export function ConnectionContextProvider({ children }: Props) {
       newWs.send(JSON.stringify(joinMessage));
     }
 
+    newWs.onerror = (error) => {
+      console.log("WebSocket Error: ", error);
+    }
+
     newWs.onmessage = (event) => {
       const response = JSON.parse(event.data);
       console.log("Response received from WS: ", response);
@@ -54,17 +63,41 @@ export function ConnectionContextProvider({ children }: Props) {
         setLocalGameState(response.message);
       }
     }
+
+    window.addEventListener('beforeunload', () => {
+      console.log('abcd');
+      if (newWs && newWs.readyState === WebSocket.OPEN) {
+        console.log("abc")
+        const closeMessage = {
+          type: 'close',
+          message: {
+            gameId: data.gameId,
+            username: data.username
+          }
+        }
+        newWs.send(JSON.stringify(closeMessage));
+        newWs.close();
+      }
+    });
   }
 
   const resetLocalVars = () => {
     setLocalGameState({
       gameId: 0,
       host: "",
-      players: [{username: ""}],
+      players: [{ username: "" }],
       gameState: "",
       chatMessages: []
     });
-    if (ws){
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      const closeMessage = {
+        type: 'close',
+        message: {
+          gameId: gameId,
+          username: username
+        }
+      }
+      ws.send(JSON.stringify(closeMessage));
       ws.close();
     }
   }
