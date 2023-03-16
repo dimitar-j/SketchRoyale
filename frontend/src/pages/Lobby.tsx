@@ -1,52 +1,35 @@
-import { getYjsValue } from "@syncedstore/core";
-import { useSyncedStore } from "@syncedstore/react";
 import React from "react";
-import { useParams } from "react-router-dom";
+import { useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import Avatar from "../assets/Avatar.svg";
-import { useConnectionContext, store } from "../context/ConnectionContext";
+import { useConnectionContext } from "../context/ConnectionContext";
 import NavBar from "../components/NavBar";
-
-const EXAMPLE_PLAYERS = [
-  "Brian",
-  "Dimitar",
-  "Ajay",
-  "Jacob",
-  "Gabe",
-  "Brian",
-  "Dimitar",
-  "Ajay",
-  "Jacob",
-  "Gabe",
-  "Brian",
-  "Dimitar",
-  "Ajay",
-  "Jacob",
-  "Gabe",
-  "Brian",
-  "Dimitar",
-  "Ajay",
-  "Jacob",
-  "Gabe",
-];
 
 function Lobby() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { localGameState } = useConnectionContext(); 
   const startGame = () => {
     console.log("START GAME");
   };
  
-  const state = useSyncedStore(store);
+  useEffect(() => {
+    if (localGameState.gameId == 0){
+      navigate("/");
+    }
+  }, [localGameState])
   
   const Card = () => {
+    console.log(localGameState);
     return (
       <div className="mt-6 bg-white rounded-lg p-8 shadow-2xl max-h-96 overflow-y-scroll">
-        {state.playerList.map((player, index) => (
+        {localGameState.players.map((player: {username: string}, index:number) => (
           <div
             key={index}
             className="flex flex-row] border-b border-black py-4 gap-4 items-center"
           >
             <img src={Avatar} className=""></img>
-            <div className="font-san">{player}</div>
+            <div className="font-san">{player.username}</div>
           </div>
         ))}
       </div>
