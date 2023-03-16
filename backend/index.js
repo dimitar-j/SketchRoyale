@@ -1,142 +1,51 @@
-#!/usr/bin/env node
+const WebSocket = require('ws');
+const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
 
-import ws from 'ws'
-import http from 'http'
-import * as map from 'lib0/map'
+let gameRooms = []
 
-const wsReadyStateConnecting = 0
-const wsReadyStateOpen = 1
-const wsReadyStateClosing = 2 // eslint-disable-line
-const wsReadyStateClosed = 3 // eslint-disable-line
+wss.on('connection', function connection(ws) {
+  ws.on('message', function incoming(message) {
+    const data = JSON.parse(message)
+    switch (data.type) {
+      case 'join':
+        console.log('incoming join message');
+        handleJoin(data, ws);
+        break;
+      case 'start':
+        console.log('incoming start message');
+        handleStart(data, ws);
+        break;
+      case 'chat':
+        console.log('incoming chat message');
+        handleChat(data, ws);
+        break;
+    }
+  });
+});
 
-const pingTimeout = 30000
-
-const port = process.env.PORT || 433
-// @ts-ignore
-const wss = new ws.Server({ noServer: true })
-
-const server = http.createServer((request, response) => {
-  response.writeHead(200, { 'Content-Type': 'text/plain' })
-  response.end('okay')
-})
-
-/**
- * Map froms topic-name to set of subscribed clients.
- * @type {Map<string, Set<any>>}
- */
-const topics = new Map()
-
-/**
- * @param {any} conn
- * @param {object} message
- */
-const send = (conn, message) => {
-  console.log("send");
-  if (conn.readyState !== wsReadyStateConnecting && conn.readyState !== wsReadyStateOpen) {
-    conn.close()
-  }
-  try {
-    conn.send(JSON.stringify(message))
-  } catch (e) {
-    conn.close()
-  }
+function updateAllPlayers(gameId) {
+  gameRooms[gameId].players.map((curr_player) => {
+    curr_player.ws.send(JSON.stringify({
+      type: "join-message",
+      message: {
+        gameId: gameId,
+        host: gameRooms[gameId].host,
+        players: gameRooms[gameId].players.map(({username}) => ({username})),
+        gameState: gameRooms[gameId].gameState,
+        chatMessages: gameRooms[gameId].chatMessages
+      }
+    }));
+  });
 }
 
-/**
- * Setup a new client
- * @param {any} conn
- */
-const onconnection = conn => {
-  /**
-   * @type {Set<string>}
-   */
-  console.log("incoming conn");
-  const subscribedTopics = new Set()
-  let closed = false
-  // Check if connection is still alive
-  let pongReceived = true
-  const pingInterval = setInterval(() => {
-    if (!pongReceived) {
-      conn.close()
-      clearInterval(pingInterval)
-    } else {
-      pongReceived = false
-      try {
-        conn.ping()
-      } catch (e) {
-        conn.close()
-      }
-    }
-  }, pingTimeout)
-  conn.on('pong', () => {
-    pongReceived = true
-  })
-  conn.on('close', () => {
-    subscribedTopics.forEach(topicName => {
-      const subs = topics.get(topicName) || new Set()
-      subs.delete(conn)
-      if (subs.size === 0) {
-        topics.delete(topicName)
-      }
-    })
-    subscribedTopics.clear()
-    closed = true
-  })
-  conn.on('message', /** @param {object} message */ message => {
-    if (typeof message === 'string') {
-      message = JSON.parse(message)
-    }
-    if (message && message.type && !closed) {
-      switch (message.type) {
-        case 'subscribe':
-          /** @type {Array<string>} */ (message.topics || []).forEach(topicName => {
-            if (typeof topicName === 'string') {
-              // add conn to topic
-              const topic = map.setIfUndefined(topics, topicName, () => new Set())
-              topic.add(conn)
-              // add topic to conn
-              subscribedTopics.add(topicName)
-            }
-          })
-          break
-        case 'unsubscribe':
-          /** @type {Array<string>} */ (message.topics || []).forEach(topicName => {
-            const subs = topics.get(topicName)
-            if (subs) {
-              subs.delete(conn)
-            }
-          })
-          break
-        case 'publish':
-          if (message.topic) {
-            const receivers = topics.get(message.topic)
-            if (receivers) {
-              receivers.forEach(receiver =>
-                send(receiver, message)
-              )
-            }
-          }
-          break
-        case 'ping':
-          send(conn, { type: 'pong' })
-      }
-    }
-  })
-}
-wss.on('connection', onconnection)
+function handleJoin(data, ws) {
+  const gameId = data.message.gameId;
+  const username = data.message.username;
 
-server.on('upgrade', (request, socket, head) => {
-  // You may check auth of request here..
-  /**
-   * @param {any} ws
-   */
-  console.log("server on");
-  const handleAuth = ws => {
-    wss.emit('connection', ws, request)
+  let roomData = gameRooms[gameId];
+  if (!roomData) {
+    gameRooms[gameId] = { host: username, players: [], gameState: "lobby", chatMessages: [] };
   }
-  wss.handleUpgrade(request, socket, head, handleAuth)
-})
-
-server.listen(port)
-
-console.log('Signaling server running on localhost:', port)
+  gameRooms[gameId].players.push({ username: username, ws: ws });
+  updateAllPlayers(gameId);
+};

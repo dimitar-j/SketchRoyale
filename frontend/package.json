@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "host": "vite --host"
   },
   "dependencies": {
     "@syncedstore/core": "^0.4.3",
@@ -17,6 +18,7 @@
     "react-loading": "^2.0.3",
     "react-router-dom": "^6.8.1",
     "y-webrtc": "^10.2.4",
+    "y-websocket": "^1.4.6",
     "yjs": "^13.5.47"
   },
   "devDependencies": {

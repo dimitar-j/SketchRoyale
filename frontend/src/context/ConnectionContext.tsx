@@ -1,61 +1,60 @@
-// @ts-nocheck
 import { createContext, useContext, useState } from "react"
-import { syncedStore, getYjsDoc } from "@syncedstore/core";
-import { WebrtcProvider } from "y-webrtc";
-import { useSyncedStore } from "@syncedstore/react";
-import { MappedTypeDescription } from "@syncedstore/core/types/doc";
 
 interface Props {
   children: React.ReactNode | React.ReactNode[]
-}
+};
+
+type serverResponse = {
+  gameId: number,
+  host: string,
+  players: [{username: string}],
+  gameState: string,
+  chatMessages: []
+};
 
 type ConnectionContextType = {
-  setUpRoomContext: (data: {username:string, gameId: string}) => Promise<"Success" | "Fail">;
-}
+  setupRoomContext: (data: {username: string, gameId: string}) => void;
+  localGameState: serverResponse;
+};
 
 const connectionContext = createContext<ConnectionContextType>({} as ConnectionContextType);
-export const store = syncedStore({playerList: [], gameStatus: "text"});
-const doc = getYjsDoc(store);
 
 export function ConnectionContextProvider({ children }: Props) {
-  const [gameRoom, setGameRoom] = useState<string>("");
-  const [username, setUsername] = useState<string>("");
-  const state = useSyncedStore(store);
+  const [localGameState, setLocalGameState] = useState<serverResponse>({
+    gameId: 0,
+    host: "", 
+    players: [{username: ""}], 
+    gameState: "", 
+    chatMessages: []
+  });
 
-  async function setUpRoomContext(data: {username: string, gameId: string}) {
-    setGameRoom(data.gameId);
-    setUsername(data.username);
-    const webRtcProvider = new WebrtcProvider(data.gameId, doc, {
-      signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'],
-      // password: "temp-game-password",
-    });
-    const result = await connectToServer(addPlayer(data.username));
-    if ((result === "Done")) {
-      console.log("player added")
-      return "Success";
-    } else {
-      return "Fail";
+  const setupRoomContext = (data: { username: string, gameId: string }) => {
+    // connect to websocket
+    const newWs = new WebSocket("ws://localhost:8080");
+    newWs.onopen = () => {
+      console.log("connected");
+
+      const joinMessage = {
+        type: 'join',
+        message: {
+          gameId: data.gameId,
+          username: data.username
+        }
+      };
+      newWs.send(JSON.stringify(joinMessage));
     }
-  };
 
-  function connectToServer(theFunction: Function) {
-    return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve(theFunction());
-      }, 2500);
-    });
+    newWs.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+      console.log("Response received from WS: ", response);
+      if (response.type === "join-message") {
+        setLocalGameState(response.message);
+      }
+    }
   }
 
-  function addPlayer(username: string) {
-    return (() => {
-      state.playerList.push(username);
-      console.log("player pushed")
-      return "Done";
-    });
-  };
-
   return (
-    <connectionContext.Provider value={{ setUpRoomContext }}>
+    <connectionContext.Provider value={{ setupRoomContext, localGameState }}>
       {children}
     </connectionContext.Provider>
   )
@@ -64,4 +63,3 @@ export function ConnectionContextProvider({ children }: Props) {
 export function useConnectionContext(): ConnectionContextType {
   return useContext(connectionContext);
 }
-
