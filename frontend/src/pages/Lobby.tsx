@@ -16,7 +16,7 @@ function Lobby() {
     console.log(localGameState);
     return (
       <div className="mt-6 bg-white rounded-lg p-8 shadow-2xl max-h-96 overflow-y-scroll">
-        {localGameState.players.map((player:string, index:number) => (
+        {localGameState.players.map((player: {username: string}, index:number) => (
           <div
             key={index}
             className="flex flex-row] border-b border-black py-4 gap-4 items-center"
