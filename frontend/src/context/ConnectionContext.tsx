@@ -16,6 +16,7 @@ type ConnectionContextType = {
   setupRoomContext: (data: { username: string; gameId: string }) => void;
   localGameState: serverResponse;
   resetLocalVars: () => void;
+  username: String;
 };
 
 const connectionContext = createContext<ConnectionContextType>(
@@ -32,7 +33,7 @@ export function ConnectionContextProvider({ children }: Props) {
   });
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameId, setGameId] = useState("");
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState<String>("");
 
   const setupRoomContext = (data: { username: string; gameId: string }) => {
     // connect to websocket
@@ -106,7 +107,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
   return (
     <connectionContext.Provider
-      value={{ setupRoomContext, localGameState, resetLocalVars }}
+      value={{ setupRoomContext, localGameState, resetLocalVars, username }}
     >
       {children}
     </connectionContext.Provider>
