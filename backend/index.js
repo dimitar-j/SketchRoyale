@@ -51,15 +51,15 @@ function updateAllPlayers(gameId) {
 };
 
 function newRound(args) { // jacob
-  
+
 };
 
 function endRound(args) { // jacob + gabe
 
 };
 
-function handleCreateRoom(data, ws){ // gabe
-  
+function handleCreateRoom(data, ws) { // gabe
+
 };
 
 function handleJoinRoom(data, ws) { // jacob
@@ -68,30 +68,46 @@ function handleJoinRoom(data, ws) { // jacob
 
   let roomData = gameRooms[gameId];
   if (!roomData) {
-    gameRooms[gameId] = { host: username, players: [], gameState: "lobby", chatMessages: [] };
+    gameRooms[gameId] = {
+      host: username,
+      currentDrawer: username,
+      currentWord: "",
+      drawingBoard: [],
+      players: [],
+      gameState: "lobby",
+      chatMessages: []
+    };
   }
   gameRooms[gameId].players.push({ username: username, ws: ws });
   updateAllPlayers(gameId);
 };
 
-function handleStartGame(data, ws){ // ajay
+function handleStartGame(data, ws) { // ajay
 
 };
 
-function handleChat(data, ws){ // dimitar
-  
+function handleChat(data, ws) { // dimitar
+
 };
 
-function handleDraw(data, ws){ // dimitar
-  
+function handleDraw(data, ws) { // dimitar
+
 };
 
 function handleClose(data, ws) {
   gameRooms[data.message.gameId].players.map((curr_player, index) => {
-    console.log(curr_player.username, index);
     if (curr_player.username === data.message.username) {
       gameRooms[data.message.gameId].players.splice(index, 1);
+      if ((curr_player.username === gameRooms[data.message.gameId].host) && gameRooms[data.message.gameId].players.length >= 1) {
+        gameRooms[data.message.gameId].host = gameRooms[data.message.gameId].players[Math.floor(Math.random() * gameRooms[data.message.gameId].players.length)].username;
+      }
+      else if (gameRooms[data.message.gameId].players.length == 0) {
+        gameRooms[data.message.gameId] = null;
+        console.log("last player in the room, resetting gameID", data.message.gameId)
+      }
     }
   })
-  updateAllPlayers(data.message.gameId);
+  if (gameRooms[data.message.gameId]) {
+    updateAllPlayers(data.message.gameId);
+  }
 };
