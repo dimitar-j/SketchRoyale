@@ -7,21 +7,30 @@ wss.on('connection', function connection(ws) {
   ws.on('message', function incoming(message) {
     const data = JSON.parse(message)
     switch (data.type) {
-      case 'join':
-        console.log('incoming join message');
-        handleJoin(data, ws);
+      case 'create-room':
+        console.log('incoming create room message');
+        handleCreateRoom(data, ws);
         break;
-      case 'start':
-        console.log('incoming start message');
-        handleStart(data, ws);
+      case 'join': // rename to join-room later
+        console.log('incoming join room message');
+        handleJoinRoom(data, ws);
+        break;
+      case 'start-game':
+        console.log('incoming start game message');
+        handleStartGame(data, ws);
         break;
       case 'chat':
         console.log('incoming chat message');
         handleChat(data, ws);
         break;
+      case 'draw':
+        console.log('incoming draw message');
+        handleDraw(data, ws);
+        break;
       case 'close':
         console.log("incoming close message");
         handleClose(data, ws);
+        break;
     }
   });
 });
@@ -39,9 +48,21 @@ function updateAllPlayers(gameId) {
       }
     }));
   });
-}
+};
 
-function handleJoin(data, ws) {
+function newRound(args) { // jacob
+  
+};
+
+function endRound(args) { // jacob + gabe
+
+};
+
+function handleCreateRoom(data, ws){ // gabe
+  
+};
+
+function handleJoinRoom(data, ws) { // jacob
   const gameId = data.message.gameId;
   const username = data.message.username;
 
@@ -53,6 +74,18 @@ function handleJoin(data, ws) {
   updateAllPlayers(gameId);
 };
 
+function handleStartGame(data, ws){ // ajay
+
+};
+
+function handleChat(data, ws){ // dimitar
+  
+};
+
+function handleDraw(data, ws){ // dimitar
+  
+};
+
 function handleClose(data, ws) {
   gameRooms[data.message.gameId].players.map((curr_player, index) => {
     console.log(curr_player.username, index);
@@ -61,12 +94,4 @@ function handleClose(data, ws) {
     }
   })
   updateAllPlayers(data.message.gameId);
-}
-
-
-
-
-
-
-
-
+};
