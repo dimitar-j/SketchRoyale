@@ -52,6 +52,11 @@ function Lobby() {
       >
         START GAME
       </button>}
+      {localGameState.host != username && <div
+        className="bg-red p-4 font-display text-3xl text-white w-full mt-4 text-center"
+      >
+        Waiting for host to start...
+      </div>}
     </div>
   );
 }
