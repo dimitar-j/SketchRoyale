@@ -18,6 +18,7 @@ type ConnectionContextType = {
   resetLocalVars: () => void;
 };
 
+
 const connectionContext = createContext<ConnectionContextType>({} as ConnectionContextType);
 
 export function ConnectionContextProvider({ children }: Props) {
@@ -31,7 +32,7 @@ export function ConnectionContextProvider({ children }: Props) {
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
-
+  
   const setupRoomContext = (data: { username: string, gameId: string }) => {
     // connect to websocket
     const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
@@ -62,6 +63,7 @@ export function ConnectionContextProvider({ children }: Props) {
       if (response.type === "join-message") {
         setLocalGameState(response.message);
       }
+
     }
 
     window.addEventListener('beforeunload', () => {
@@ -100,6 +102,14 @@ export function ConnectionContextProvider({ children }: Props) {
       ws.send(JSON.stringify(closeMessage));
       ws.close();
     }
+  }
+
+  function removePlayer(username: string) {
+    return (() => {
+      state.playerList = state.playerList.filter((player) => player !== username);
+      // console.log("player removed");
+      return "Done";
+    });
   }
 
   return (
