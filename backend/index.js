@@ -93,7 +93,7 @@ function handleJoinRoom(data, ws) {
     ws.send(
       JSON.stringify({
         type: "game-error",
-        message: "Game does not exist",
+        message: `Game ID, ${gameId}, does not exist`,  
       })
     );
   } else {
