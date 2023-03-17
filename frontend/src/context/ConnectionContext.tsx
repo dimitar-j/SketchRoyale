@@ -20,7 +20,7 @@ type ConnectionContextType = {
   resetLocalVars: () => void;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-
+  username: String;
 };
 
 const connectionContext = createContext<ConnectionContextType>(
@@ -37,9 +37,9 @@ export function ConnectionContextProvider({ children }: Props) {
   });
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameId, setGameId] = useState("");
-  const [username, setUsername] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const [username, setUsername] = useState<String>("");
 
   const joinRoomContext = (data: { username: string; gameId: string }) => {
     // connect to websocket
@@ -169,7 +169,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
   return (
     <connectionContext.Provider
-      value={{ setupRoomContext, joinRoomContext, localGameState, resetLocalVars, loading, setLoading }}
+      value={{ setupRoomContext, joinRoomContext, localGameState, resetLocalVars, username, loading, setLoading }}
     >
       {children}
     </connectionContext.Provider>
