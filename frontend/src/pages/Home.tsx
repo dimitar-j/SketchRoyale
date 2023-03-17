@@ -103,6 +103,7 @@ function Home() {
             JOIN
           </button>
           <div className="text-sans color-black text-center">or</div>
+          <div className="font-display text-black text-4xl">Create Game</div>
           <input
             placeholder="Username"
             className="border-2 p-2 border-black focus:outline-blue focus:rounded-none"

@@ -1,11 +1,18 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import Home from "../assets/Home.svg";
+import { useConnectionContext } from "../context/ConnectionContext";
+
+// type NavBarProps = {
+//     username: string;
+// }
 
 function NavBar () {
     const navigate = useNavigate();
+    const { removeDisconnectedPlayer } = useConnectionContext();
 
     const goHome = () => {
+        // removeDisconnectedPlayer();
         navigate("/");
     }
 

@@ -11,6 +11,7 @@ interface Props {
 
 type ConnectionContextType = {
   setUpRoomContext: (data: {username:string, gameId: string}) => Promise<"Success" | "Fail">;
+  removeDisconnectedPlayer: (username: string) => Promise<"Done">;
 }
 
 const connectionContext = createContext<ConnectionContextType>({} as ConnectionContextType);
@@ -23,7 +24,7 @@ export function ConnectionContextProvider({ children }: Props) {
   const state = useSyncedStore(store);
 
   async function setUpRoomContext(data: {username: string, gameId: string}) {
-    setGameRoom(data.gameId);
+    setGameRoom(data.gameId); 
     setUsername(data.username);
     const webRtcProvider = new WebrtcProvider(data.gameId, doc, {
       signaling: ['wss://signalling-server-2zwtarwoya-uw.a.run.app'],
@@ -46,6 +47,13 @@ export function ConnectionContextProvider({ children }: Props) {
     });
   }
 
+  async function removeDisconnectedPlayer(username: string) {
+    const result = await connectToServer(removePlayer(username));
+    if ((result === "Done")) {
+      console.log("player removed")
+    }
+  }
+
   function addPlayer(username: string) {
     return (() => {
       state.playerList.push(username);
@@ -53,6 +61,14 @@ export function ConnectionContextProvider({ children }: Props) {
       return "Done";
     });
   };
+
+  function removePlayer(username: string) {
+    return (() => {
+      state.playerList = state.playerList.filter((player) => player !== username);
+      // console.log("player removed");
+      return "Done";
+    });
+  }
 
   return (
     <connectionContext.Provider value={{ setUpRoomContext }}>
