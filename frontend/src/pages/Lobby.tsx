@@ -8,7 +8,7 @@ import NavBar from "../components/NavBar";
 function Lobby() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { localGameState } = useConnectionContext(); 
+  const { localGameState, username } = useConnectionContext(); 
   const startGame = () => {
     console.log("START GAME");
   };
@@ -18,6 +18,10 @@ function Lobby() {
       navigate("/");
     }
   }, [localGameState])
+
+  useEffect(() => {
+    console.log(username)
+  }, [])
   
   const Card = () => {
     console.log(localGameState);
@@ -42,12 +46,12 @@ function Lobby() {
       <div className="font-display text-white text-6xl">Lobby</div>
       <div className="font-sans text-white text-xl">Game ID: {id}</div>
       {Card()}
-      <button
+      {localGameState.host ===  username && <button
         className="bg-red p-4 font-display text-3xl text-white w-full mt-4"
         onClick={startGame}
       >
         START GAME
-      </button>
+      </button>}
     </div>
   );
 }
