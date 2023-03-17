@@ -34,6 +34,9 @@ function Lobby() {
           >
             <img src={Avatar} className=""></img>
             <div className="font-san">{player.username}</div>
+            {player.username === localGameState.host && (
+              <img src="/star-solid.svg" width="15" height="15"/>
+            )} 
           </div>
         ))}
       </div>
