@@ -9,7 +9,7 @@ function Home() {
   const [username, setUsername] = useState("");
   const [hostname, setHostname] = useState("");
   const [loading, setLoading] = useState(false);
-  const { setUpRoomContext } = useConnectionContext();
+  const { setupRoomContext, localGameState } = useConnectionContext();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,24 +22,16 @@ function Home() {
       gameId,
       username,
     };
-    setUpRoomContext(data).then((res) => {
-      if (res == "Success") {
-        navigate("/lobby/" + gameId);
-      } else {
-        window.alert("There was an error connecting to the lobby. Please try again.")
-        setLoading(false);
-      }
-    });
+    setupRoomContext(data);
     setGameId("");
     setUsername("");
-
   };
 
-  async function generateGameId () {
+  async function generateGameId() {
     var minm = 100000;
     var maxm = 999999;
     const id = Math.floor(Math
-    .random() * (maxm - minm + 1)) + minm;
+      .random() * (maxm - minm + 1)) + minm;
     console.log(id);
     console.log(id.toString());
     return id.toString();
@@ -51,18 +43,18 @@ function Home() {
       gameId: await generateGameId(),
       username: hostname,
     };
-    setUpRoomContext(data).then((res) => {
-      if (res == "Success") {
-        navigate("/lobby/" + data.gameId);
-      } else {
-        window.alert("There was an error connecting to the lobby. Please try again.")
-        setLoading(false);
-      }
-    });
+    setupRoomContext(data);
     setGameId("");
     setHostname("");
     console.log("Creating Game");
   };
+
+  useEffect(() => {
+    if (localGameState.gameState === "lobby"){
+      setLoading(false);
+      navigate("/lobby/" + localGameState.gameId);
+    }
+  }, [localGameState])
 
   const Banner = () => {
     return (
@@ -123,11 +115,11 @@ function Home() {
   };
 
   return (
-    loading ? <LoadingScreen /> :  
-    <div className="w-full h-[100vh] flex">
-      {Banner()} 
-      {Card()}
-    </div>
+    loading ? <LoadingScreen /> :
+      <div className="w-full h-[100vh] flex">
+        {Banner()}
+        {Card()}
+      </div>
   );
 }
 
