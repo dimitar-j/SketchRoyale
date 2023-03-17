@@ -8,8 +8,8 @@ function Home() {
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
   const [hostname, setHostname] = useState("");
-  const [loading, setLoading] = useState(false);
-  const { setupRoomContext, localGameState } = useConnectionContext();
+  const { setupRoomContext, joinRoomContext, localGameState, loading, setLoading } = useConnectionContext();
+  
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -22,7 +22,7 @@ function Home() {
       gameId,
       username,
     };
-    setupRoomContext(data);
+    joinRoomContext(data);
     setGameId("");
     setUsername("");
   };
