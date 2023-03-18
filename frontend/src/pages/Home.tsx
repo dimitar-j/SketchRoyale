@@ -8,7 +8,7 @@ function Home() {
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
   const [hostname, setHostname] = useState("");
-  const { setupRoomContext, joinRoomContext, localGameState, loading, setLoading } = useConnectionContext();
+  const { joinRoomContext, localGameState, loading, setLoading } = useConnectionContext();
   
   const navigate = useNavigate();
 
@@ -21,6 +21,7 @@ function Home() {
     const data = {
       gameId,
       username,
+      type: "join",
     };
     joinRoomContext(data);
     setGameId("");
@@ -42,8 +43,9 @@ function Home() {
     const data = {
       gameId: await generateGameId(),
       username: hostname,
+      type: "create",
     };
-    setupRoomContext(data);
+    joinRoomContext(data);
     setGameId("");
     setHostname("");
     console.log("Creating Game");
