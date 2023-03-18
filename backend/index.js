@@ -65,8 +65,9 @@ function newRound(args) {
   // set current word to new word
   gameRooms[args.gameId].currentWord = randomWord;
   console.log("new round, new word:", randomWord);
-  // set game state to drawing
-  gameRooms[args.gameId].gameState = "drawing";
+  // set game state to drawer-confirm-word
+  gameRooms[args.gameId].gameState = "drawer-confirm-word";
+  console.log("game state:", gameRooms[args.gameId].gameState);
   // update all players with the new game state
   updateAllPlayers(args.gameId);
 }
@@ -122,7 +123,17 @@ function handleJoinRoom(data, ws) {
         message: `Game ID, ${gameId}, does not exist`,  
       })
     );
-  } else {
+  } 
+  //check if username is already taken
+  else if (gameRooms[gameId].players.some((player) => player.username === username)) {
+    ws.send(
+      JSON.stringify({
+        type: "game-error",
+        message: `Username, ${username}, is already taken`,
+      })
+    );
+  }
+  else {
     gameRooms[gameId].players.push({ username: username, ws: ws });
     updateAllPlayers(gameId);
   }
@@ -131,14 +142,13 @@ function handleJoinRoom(data, ws) {
 function handleStartGame(data, ws) {
   // ajay
   // set currentDrawer to host
-  gameRooms[data.message.gameId].gameState = "playing";
   gameRooms[data.message.gameId].currentDrawer = gameRooms[data.message.gameId].host;
   // set guesses to 3
   gameRooms[data.message.gameId].players.map((curr_player) => {
     curr_player.guesses = 3;
   });
   // call newRound
-  newRound(data.message.gameId);
+  newRound(data.message);
 }
 
 function handleChat(data, ws) {

@@ -19,6 +19,7 @@ type serverResponse = {
 type ConnectionContextType = {
   joinRoomContext: (data: { username: string; gameId: string; type: string; }) => void;
   localGameState: serverResponse;
+  startGame: () => void;
   resetLocalVars: () => void;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -118,6 +119,19 @@ export function ConnectionContextProvider({ children }: Props) {
     });
   };
 
+  const startGame = () =>{
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      const startMessage = {
+        type: "start-game",
+        message: {
+          gameId: gameId,
+          username: username,
+        },
+      };
+      ws.send(JSON.stringify(startMessage));
+    }
+  }
+
   const resetLocalVars = () => {
     setLocalGameState({
       gameId: 0,
@@ -144,7 +158,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
   return (
     <connectionContext.Provider
-      value={{ joinRoomContext, localGameState, resetLocalVars, username, loading, setLoading }}
+      value={{ joinRoomContext, localGameState, startGame, resetLocalVars, username, loading, setLoading }}
     >
       {children}
     </connectionContext.Provider>

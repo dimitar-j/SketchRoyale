@@ -56,6 +56,10 @@ function Home() {
       setLoading(false);
       navigate("/lobby/" + localGameState.gameId);
     }
+    if (localGameState.gameState === "game" || localGameState.gameState === "drawer-confirm-word"){
+      setLoading(false);
+      navigate("/game/" + localGameState.gameId);
+    }
   }, [localGameState])
 
   const Banner = () => {

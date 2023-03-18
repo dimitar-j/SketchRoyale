@@ -8,14 +8,19 @@ import NavBar from "../components/NavBar";
 function Lobby() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { localGameState, username } = useConnectionContext(); 
-  const startGame = () => {
+  const { startGame, localGameState, username } = useConnectionContext(); 
+  const startGameHandler = () => {
     console.log("START GAME");
+    // send message to server of type "start-game"
+    startGame();
   };
  
   useEffect(() => {
     if (localGameState.gameId == 0){
       navigate("/");
+    }
+    if (localGameState.gameState === "game" || localGameState.gameState === "drawer-confirm-word"){
+      navigate("/game/" + localGameState.gameId);
     }
   }, [localGameState])
 
@@ -51,7 +56,8 @@ function Lobby() {
       {Card()}
       {localGameState.host ===  username && <button
         className="bg-red p-4 font-display text-3xl text-white w-full mt-4"
-        onClick={startGame}
+        id="start-button"
+        onClick={startGameHandler}
       >
         START GAME
       </button>}
