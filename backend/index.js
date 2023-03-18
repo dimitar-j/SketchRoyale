@@ -1,3 +1,4 @@
+var randomWords = require("random-words");
 const WebSocket = require("ws");
 const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
 
@@ -43,11 +44,14 @@ function updateAllPlayers(gameId) {
         message: {
           gameId: gameId,
           host: gameRooms[gameId].host,
+          currentDrawer: gameRooms[gameId].currentDrawer,
+          currentWord: gameRooms[gameId].currentWord,
           players: gameRooms[gameId].players.map(({ username }) => ({
             username,
           })),
           gameState: gameRooms[gameId].gameState,
           chatMessages: gameRooms[gameId].chatMessages,
+          drawingBoard: gameRooms[gameId].drawingBoard,
         },
       })
     );
@@ -56,10 +60,32 @@ function updateAllPlayers(gameId) {
 
 function newRound(args) {
   // jacob
+  // generate new word
+  const randomWord = randomWords();
+  // set current word to new word
+  gameRooms[args.gameId].currentWord = randomWord;
+  console.log("new round, new word:", randomWord);
+  // set game state to drawing
+  gameRooms[args.gameId].gameState = "drawing";
+  // update all players with the new game state
+  updateAllPlayers(args.gameId);
 }
 
 function endRound(args) {
   // jacob + gabe
+  // set current drawer to next player
+  gameRooms[args.gameId].currentDrawer = gameRooms[args.gameId].players[gameRooms[args.gameId].players.indexOf(gameRooms[args.gameId].currentDrawer) + 1].username;
+  // clear drawing board
+  gameRooms[args.gameId].drawingBoard = [];
+  // clear chat messages
+  gameRooms[args.gameId].chatMessages = [];
+  // reset guess count for all players
+  gameRooms[args.gameId].players.map((player) => {
+    player.guesses = 0;
+  }
+  );
+  // call newRound function
+  newRound(args);
 }
 
 function handleCreateRoom(data, ws) {
