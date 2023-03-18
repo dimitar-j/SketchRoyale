@@ -17,8 +17,7 @@ type serverResponse = {
 };
 
 type ConnectionContextType = {
-  setupRoomContext: (data: { username: string; gameId: string }) => void;
-  joinRoomContext: (data: { username: string; gameId: string }) => void;
+  joinRoomContext: (data: { username: string; gameId: string; type: string; }) => void;
   localGameState: serverResponse;
   resetLocalVars: () => void;
   loading: boolean;
@@ -47,7 +46,7 @@ export function ConnectionContextProvider({ children }: Props) {
   const navigate = useNavigate();
   const [username, setUsername] = useState<String>("");
 
-  const joinRoomContext = (data: { username: string; gameId: string }) => {
+  const joinRoomContext = (data: { username: string; gameId: string; type: string; }) => {
     // connect to websocket
     // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
     const newWs = new WebSocket("ws://localhost:8080");
@@ -56,16 +55,31 @@ export function ConnectionContextProvider({ children }: Props) {
       setWs(newWs);
       setGameId(data.gameId);
       setUsername(data.username);
+
+      if (data.type === "join") {
       // create join message
-      const joinMessage = {
-        type: "join",
-        message: {
-          gameId: data.gameId,
-          username: data.username,
-        },
-      };
-      // send join message
-      newWs.send(JSON.stringify(joinMessage));
+        const joinMessage = {
+          type: "join",
+          message: {
+            gameId: data.gameId,
+            username: data.username,
+          },
+        };
+        // send join message
+        newWs.send(JSON.stringify(joinMessage));
+      }
+      if (data.type === "create") {
+      // create create message
+        const createMessage = {
+          type: "create-room",
+          message: {
+            gameId: data.gameId,
+            username: data.username,
+          },
+        };
+        // send create message
+        newWs.send(JSON.stringify(createMessage));
+      }
     };
 
     newWs.onerror = (error) => {
@@ -84,55 +98,6 @@ export function ConnectionContextProvider({ children }: Props) {
         resetLocalVars();
         setLoading(false);
         navigate("/");
-      }
-    };
-
-    window.addEventListener("beforeunload", () => {
-      console.log("abcd");
-      if (newWs && newWs.readyState === WebSocket.OPEN) {
-        console.log("abc");
-        const closeMessage = {
-          type: "close",
-          message: {
-            gameId: data.gameId,
-            username: data.username,
-          },
-        };
-        newWs.send(JSON.stringify(closeMessage));
-        newWs.close();
-      }
-    });
-  };
-
-  const setupRoomContext = (data: { username: string; gameId: string }) => {
-    // connect to websocket
-    // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
-    const newWs = new WebSocket("ws://localhost:8080");
-    newWs.onopen = () => {
-      console.log("connected");
-      setWs(newWs);
-      setGameId(data.gameId);
-      setUsername(data.username);
-
-      const createMessage = {
-        type: "create-room",
-        message: {
-          gameId: data.gameId,
-          username: data.username,
-        },
-      };
-      newWs.send(JSON.stringify(createMessage));
-    };
-
-    newWs.onerror = (error) => {
-      console.log("WebSocket Error: ", error);
-    };
-
-    newWs.onmessage = (event) => {
-      const response = JSON.parse(event.data);
-      console.log("Response received from WS: ", response);
-      if (response.type === "join-message") {
-        setLocalGameState(response.message);
       }
     };
 
@@ -179,7 +144,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
   return (
     <connectionContext.Provider
-      value={{ setupRoomContext, joinRoomContext, localGameState, resetLocalVars, username, loading, setLoading }}
+      value={{ joinRoomContext, localGameState, resetLocalVars, username, loading, setLoading }}
     >
       {children}
     </connectionContext.Provider>
