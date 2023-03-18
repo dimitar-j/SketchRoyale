@@ -104,6 +104,15 @@ function handleJoinRoom(data, ws) {
 
 function handleStartGame(data, ws) {
   // ajay
+  // set currentDrawer to host
+  gameRooms[data.message.gameId].gameState = "playing";
+  gameRooms[data.message.gameId].currentDrawer = gameRooms[data.message.gameId].host;
+  // set guesses to 3
+  gameRooms[data.message.gameId].players.map((curr_player) => {
+    curr_player.guesses = 3;
+  });
+  // call newRound
+  newRound(data.message.gameId);
 }
 
 function handleChat(data, ws) {
