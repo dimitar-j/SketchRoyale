@@ -8,9 +8,12 @@ interface Props {
 type serverResponse = {
   gameId: number;
   host: string;
+  currentDrawer: string;
+  currentWord: string;
   players: [{ username: string }];
   gameState: string;
   chatMessages: [];
+  drawingBoard: [];
 };
 
 type ConnectionContextType = {
@@ -31,9 +34,12 @@ export function ConnectionContextProvider({ children }: Props) {
   const [localGameState, setLocalGameState] = useState<serverResponse>({
     gameId: 0,
     host: "",
+    currentDrawer: "",
+    currentWord: "",
     players: [{ username: "" }],
     gameState: "",
     chatMessages: [],
+    drawingBoard: [],
   });
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameId, setGameId] = useState("");
@@ -50,7 +56,7 @@ export function ConnectionContextProvider({ children }: Props) {
       setWs(newWs);
       setGameId(data.gameId);
       setUsername(data.username);
-
+      // create join message
       const joinMessage = {
         type: "join",
         message: {
@@ -58,6 +64,7 @@ export function ConnectionContextProvider({ children }: Props) {
           username: data.username,
         },
       };
+      // send join message
       newWs.send(JSON.stringify(joinMessage));
     };
 
@@ -150,9 +157,12 @@ export function ConnectionContextProvider({ children }: Props) {
     setLocalGameState({
       gameId: 0,
       host: "",
+      currentDrawer: "",
+      currentWord: "",
       players: [{ username: "" }],
       gameState: "",
       chatMessages: [],
+      drawingBoard: [],
     });
     if (ws && ws.readyState === WebSocket.OPEN) {
       const closeMessage = {
