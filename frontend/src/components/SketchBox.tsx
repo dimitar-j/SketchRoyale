@@ -36,6 +36,9 @@ function SketchBox() {
     sendDrawing(lines);
   };
 
+  const renderLines =
+    localGameState.host === username ? lines : localGameState.drawingBoard;
+
   return (
     <div className="flex flex-col col-span-2 justify-center items-center">
       {localGameState.currentDrawer === username ? (
@@ -59,7 +62,7 @@ function SketchBox() {
           onMouseUp={handleMouseUp}
         >
           <Layer>
-            {localGameState.drawingBoard.map((line, i) => (
+            {renderLines.map((line, i) => (
               <Line
                 key={i}
                 points={line["points"]}
