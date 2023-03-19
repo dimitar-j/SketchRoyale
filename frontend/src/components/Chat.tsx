@@ -33,7 +33,7 @@ function Chat() {
       <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between">
         <div className="flex flex-col gap-2">
           {EXAMPLE_CHATS.map((c, index) => (
-            <ChatCard name={c.name} chat={c.chat}></ChatCard>
+            <ChatCard key={index} name={c.name} chat={c.chat}></ChatCard>
           ))}
         </div>
         <div className="flex gap-2 w-full">
