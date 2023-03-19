@@ -189,11 +189,47 @@ function handleStartGame(data, ws) {
 function handleChat(data, ws) {
   // dimitar
   console.log("received chat", data.message.chat);
+
+  // check if guess was correct
+  const correctGuess =
+    data.message.chat.toLowerCase() ===
+    gameRooms[data.message.gameId].currentWord.toLowerCase();
+  console.log("correct: ", correctGuess);
+
+  // decrement remaining guesses count for user and increment score if correct guess
+  gameRooms[data.message.gameId].players = gameRooms[
+    data.message.gameId
+  ].players.map((player) => {
+    if (player.username === data.message.username) {
+      player.guesses -= 1;
+      player.guessedWordCorrectly = correctGuess;
+    }
+    if (correctGuess) {
+      player.score += 10; // TODO: calculation based on # of total guesses
+    }
+    return player;
+  });
+
+  // add chat
   gameRooms[data.message.gameId].chatMessages.push({
     username: data.message.username,
     message: data.message.chat,
   });
+
+  // update game state
   updateAllPlayers(data.message.gameId);
+
+  // check if game is over
+  const gameOver = gameRooms[data.message.gameId].players.reduce(
+    (accum, player) =>
+      accum && (player.guessedWordCorrectly || player.guesses === 0),
+    true
+  );
+
+  if (gameOver) {
+    console.log("ending game");
+    endRound(data.message);
+  }
 }
 
 function handleDraw(data, ws) {
