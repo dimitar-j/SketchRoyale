@@ -23,6 +23,7 @@ wss.on("connection", function connection(ws) {
       case "drawer-confirm-word":
         console.log("incoming drawer confirm word message");
         drawerConfirmWord(data, ws);
+        break;
       case "chat":
         console.log("incoming chat message");
         handleChat(data, ws);
@@ -187,6 +188,12 @@ function handleStartGame(data, ws) {
 
 function handleChat(data, ws) {
   // dimitar
+  console.log("received chat", data.message.chat);
+  gameRooms[data.message.gameId].chatMessages.push({
+    username: data.message.username,
+    message: data.message.chat,
+  });
+  updateAllPlayers(data.message.gameId);
 }
 
 function handleDraw(data, ws) {

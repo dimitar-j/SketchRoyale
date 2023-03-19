@@ -19,7 +19,7 @@ type serverResponse = {
     }
   ];
   gameState: string;
-  chatMessages: [];
+  chatMessages: { username: string; message: string }[];
   drawingBoard: { points: number[] }[];
 };
 
@@ -38,6 +38,7 @@ type ConnectionContextType = {
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   username: String;
   drawerConfirmed: () => void;
+  handleNewChat: (chat: string) => void;
 };
 
 const connectionContext = createContext<ConnectionContextType>(
@@ -185,6 +186,21 @@ export function ConnectionContextProvider({ children }: Props) {
     setLocalGameState({ ...localGameState, drawingBoard: drawing });
   };
 
+  const handleNewChat = (chat: string) => {
+    console.log("sending new chat to server", chat);
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      const data = {
+        type: "chat",
+        message: {
+          username,
+          gameId,
+          chat,
+        },
+      };
+      ws.send(JSON.stringify(data));
+    }
+  };
+
   const resetLocalVars = () => {
     setLocalGameState({
       gameId: 0,
@@ -224,6 +240,7 @@ export function ConnectionContextProvider({ children }: Props) {
         drawerConfirmed,
         sendDrawing,
         handleDrawing,
+        handleNewChat,
       }}
     >
       {children}

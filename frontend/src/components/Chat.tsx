@@ -1,28 +1,13 @@
 import React, { useState } from "react";
 import ChatCard from "./ChatCard";
 import Plane from "../assets/Plane.svg";
+import { useConnectionContext } from "../context/ConnectionContext";
 
 function Chat() {
   const [newChat, setNewChat] = useState("");
-  const EXAMPLE_CHATS = [
-    {
-      name: "Brian",
-      chat: "House",
-    },
-    {
-      name: "Ajay",
-      chat: "Dog",
-    },
-    {
-      name: "Jacob",
-      chat: "Banana",
-    },
-    {
-      name: "Gabe",
-      chat: "California",
-    },
-  ];
+  const { handleNewChat, localGameState } = useConnectionContext();
   const sendChat = () => {
+    handleNewChat(newChat);
     setNewChat("");
   };
   return (
@@ -32,9 +17,15 @@ function Chat() {
       </div>
       <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between">
         <div className="flex flex-col gap-2">
-          {EXAMPLE_CHATS.map((c, index) => (
-            <ChatCard key={index} name={c.name} chat={c.chat}></ChatCard>
-          ))}
+          {localGameState.chatMessages.length
+            ? localGameState.chatMessages?.map((c, index) => (
+                <ChatCard
+                  key={index}
+                  name={c["username"]}
+                  chat={c["message"]}
+                ></ChatCard>
+              ))
+            : null}
         </div>
         <div className="flex gap-2 w-full">
           <input
