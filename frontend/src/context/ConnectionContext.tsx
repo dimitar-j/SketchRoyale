@@ -20,7 +20,7 @@ type serverResponse = {
   ];
   gameState: string;
   chatMessages: [];
-  drawingBoard: [];
+  drawingBoard: { points: number[] }[];
 };
 
 type ConnectionContextType = {
@@ -32,7 +32,8 @@ type ConnectionContextType = {
   localGameState: serverResponse;
   startGame: () => void;
   resetLocalVars: () => void;
-  sendDrawing: (drawing: Array<{ points: number[] }>) => void;
+  sendDrawing: () => void;
+  handleDrawing: (drawing: Array<{ points: number[] }>) => void;
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   username: String;
@@ -165,18 +166,23 @@ export function ConnectionContextProvider({ children }: Props) {
     }
   };
 
-  const sendDrawing = (drawing: Array<{ points: number[] }>) => {
-    console.log("sending drawing to server", drawing);
+  const sendDrawing = () => {
+    console.log("sending drawing to server");
     if (ws && ws.readyState === WebSocket.OPEN) {
       const data = {
         type: "draw",
         message: {
           gameId,
-          drawing,
+          drawing: localGameState.drawingBoard,
         },
       };
       ws.send(JSON.stringify(data));
     }
+  };
+
+  const handleDrawing = (drawing: Array<{ points: number[] }>) => {
+    console.log("updating localgamestate drawing", drawing);
+    setLocalGameState({ ...localGameState, drawingBoard: drawing });
   };
 
   const resetLocalVars = () => {
@@ -217,6 +223,7 @@ export function ConnectionContextProvider({ children }: Props) {
         setLoading,
         drawerConfirmed,
         sendDrawing,
+        handleDrawing,
       }}
     >
       {children}

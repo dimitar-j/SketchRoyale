@@ -4,15 +4,16 @@ import { Stage, Layer, Line, Text } from "react-konva";
 import { useConnectionContext } from "../context/ConnectionContext";
 
 function SketchBox() {
-  const { localGameState, username, sendDrawing } = useConnectionContext();
-  const [lines, setLines] = useState<Array<{ points: number[] }>>([]);
+  const { localGameState, username, sendDrawing, handleDrawing } =
+    useConnectionContext();
+  //const [lines, setLines] = useState<Array<{ points: number[] }>>([]);
   const isDrawing = useRef<boolean>(false);
   const parentRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: any) => {
     isDrawing.current = true;
     const pos = e.target.getStage().getPointerPosition();
-    setLines([...lines, { points: [pos.x, pos.y] }]);
+    handleDrawing([...localGameState.drawingBoard, { points: [pos.x, pos.y] }]);
   };
 
   const handleMouseMove = (e: any) => {
@@ -22,22 +23,25 @@ function SketchBox() {
     }
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
-    let lastLine = lines[lines.length - 1];
+    let lastLine =
+      localGameState.drawingBoard[localGameState.drawingBoard.length - 1];
     // add point
     lastLine.points = lastLine.points.concat([point.x, point.y]);
 
     // replace last
-    lines.splice(lines.length - 1, 1, lastLine);
-    setLines([...lines]);
+    localGameState.drawingBoard.splice(
+      localGameState.drawingBoard.length - 1,
+      1,
+      lastLine
+    );
+    //setLines([...lines]);
+    handleDrawing(localGameState.drawingBoard);
   };
 
   const handleMouseUp = () => {
     isDrawing.current = false;
-    sendDrawing(lines);
+    sendDrawing();
   };
-
-  const renderLines =
-    localGameState.host === username ? lines : localGameState.drawingBoard;
 
   return (
     <div className="flex flex-col col-span-2 justify-center items-center">
@@ -62,7 +66,7 @@ function SketchBox() {
           onMouseUp={handleMouseUp}
         >
           <Layer>
-            {renderLines.map((line, i) => (
+            {localGameState.drawingBoard.map((line, i) => (
               <Line
                 key={i}
                 points={line["points"]}
