@@ -79,8 +79,8 @@ function newRound(args) {
 }
 
 function drawerConfirmWord(data, ws) {
-  // set game state to game
   gameRooms[data.message.gameId].gameState = "game";
+  updateAllPlayers(data.message.gameId);
 }
 
 function endRound(args) {

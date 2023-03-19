@@ -10,7 +10,7 @@ type serverResponse = {
   host: string;
   currentDrawer: string;
   currentWord: string;
-  players: [{ username: string , score: number, guesses: number, guessedWordCorrectly: boolean}];
+  players: [{ username: string, score: number, guesses: number, guessedWordCorrectly: boolean }];
   gameState: string;
   chatMessages: [];
   drawingBoard: [];
@@ -24,6 +24,7 @@ type ConnectionContextType = {
   loading: boolean;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   username: String;
+  drawerConfirmed: () => void;
 };
 
 const connectionContext = createContext<ConnectionContextType>(
@@ -36,7 +37,7 @@ export function ConnectionContextProvider({ children }: Props) {
     host: "",
     currentDrawer: "",
     currentWord: "",
-    players: [{ username: "" , score: 0, guesses: 0, guessedWordCorrectly: false}],
+    players: [{ username: "", score: 0, guesses: 0, guessedWordCorrectly: false }],
     gameState: "",
     chatMessages: [],
     drawingBoard: [],
@@ -58,7 +59,7 @@ export function ConnectionContextProvider({ children }: Props) {
       setUsername(data.username);
 
       if (data.type === "join") {
-      // create join message
+        // create join message
         const joinMessage = {
           type: "join",
           message: {
@@ -70,7 +71,7 @@ export function ConnectionContextProvider({ children }: Props) {
         newWs.send(JSON.stringify(joinMessage));
       }
       if (data.type === "create") {
-      // create create message
+        // create create message
         const createMessage = {
           type: "create-room",
           message: {
@@ -119,7 +120,7 @@ export function ConnectionContextProvider({ children }: Props) {
     });
   };
 
-  const startGame = () =>{
+  const startGame = () => {
     if (ws && ws.readyState === WebSocket.OPEN) {
       const startMessage = {
         type: "start-game",
@@ -132,13 +133,27 @@ export function ConnectionContextProvider({ children }: Props) {
     }
   }
 
+  const drawerConfirmed = () => {
+    console.log("host pressed confirm button");
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      const confirmMessage = {
+        type: "drawer-confirm-word",
+        message: {
+          gameId: gameId,
+          username: username
+        }
+      };
+      ws.send(JSON.stringify(confirmMessage));
+    }
+  }
+
   const resetLocalVars = () => {
     setLocalGameState({
       gameId: 0,
       host: "",
       currentDrawer: "",
       currentWord: "",
-      players: [{ username: "" , score: 0, guesses: 0, guessedWordCorrectly: false,}],
+      players: [{ username: "", score: 0, guesses: 0, guessedWordCorrectly: false, }],
       gameState: "",
       chatMessages: [],
       drawingBoard: [],
@@ -158,7 +173,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
   return (
     <connectionContext.Provider
-      value={{ joinRoomContext, localGameState, startGame, resetLocalVars, username, loading, setLoading }}
+      value={{ joinRoomContext, localGameState, startGame, resetLocalVars, username, loading, setLoading, drawerConfirmed }}
     >
       {children}
     </connectionContext.Provider>

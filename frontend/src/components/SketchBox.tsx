@@ -1,8 +1,10 @@
 import React, { useState, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { Stage, Layer, Line, Text } from "react-konva";
+import { useConnectionContext } from "../context/ConnectionContext";
 
 function SketchBox() {
+  const { localGameState, username } = useConnectionContext();
   const [tool, setTool] = useState<string>("pen");
   const [lines, setLines] = useState<Array<{ tool: string; points: number[] }>>(
     []
@@ -39,7 +41,12 @@ function SketchBox() {
 
   return (
     <div className="flex flex-col col-span-2 justify-center items-center">
-      <div className="font-display text-white text-4xl pl-2">Your Word: </div>
+      {localGameState.currentDrawer === username ? 
+
+      <div className="font-display text-white text-4xl pl-2">Your Word: {localGameState.currentWord}</div> :
+      
+      <div className="font-display text-white text-4xl pl-2">{"_ ".repeat(localGameState.currentWord.length)}</div>
+      }
       <div
         ref={parentRef}
         className="rounded-md bg-white h-[600px] w-[600px] shadow-2xl"
