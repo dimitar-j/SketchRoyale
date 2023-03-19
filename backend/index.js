@@ -220,11 +220,14 @@ function handleChat(data, ws) {
   updateAllPlayers(data.message.gameId);
 
   // check if game is over
-  const gameOver = gameRooms[data.message.gameId].players.reduce(
-    (accum, player) =>
-      accum && (player.guessedWordCorrectly || player.guesses === 0),
-    true
-  );
+  let finishedPlayers = 0;
+  for (let player of gameRooms[data.message.gameId].players) {
+    if (player.guessedWordCorrectly || player.guesses === 0) {
+      finishedPlayers += 1;
+    }
+  }
+  const gameOver =
+    finishedPlayers === gameRooms[data.message.gameId].players.length - 1;
 
   if (gameOver) {
     console.log("ending game");
