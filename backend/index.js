@@ -20,6 +20,9 @@ wss.on("connection", function connection(ws) {
         console.log("incoming start game message");
         handleStartGame(data, ws);
         break;
+      case "drawer-confirm-word":
+        console.log("incoming drawer confirm word message");
+        drawerConfirmWord(data, ws);
       case "chat":
         console.log("incoming chat message");
         handleChat(data, ws);
@@ -46,8 +49,11 @@ function updateAllPlayers(gameId) {
           host: gameRooms[gameId].host,
           currentDrawer: gameRooms[gameId].currentDrawer,
           currentWord: gameRooms[gameId].currentWord,
-          players: gameRooms[gameId].players.map(({ username }) => ({
+          players: gameRooms[gameId].players.map(({ username, score, guesses, guessedWordCorrectly }) => ({
             username,
+            score,
+            guesses,
+            guessedWordCorrectly,
           })),
           gameState: gameRooms[gameId].gameState,
           chatMessages: gameRooms[gameId].chatMessages,
@@ -72,19 +78,28 @@ function newRound(args) {
   updateAllPlayers(args.gameId);
 }
 
+function drawerConfirmWord(data, ws) {
+  // set game state to game
+  gameRooms[data.message.gameId].gameState = "game";
+}
+
 function endRound(args) {
   // jacob + gabe
   // set current drawer to next player
-  gameRooms[args.gameId].currentDrawer = gameRooms[args.gameId].players[gameRooms[args.gameId].players.indexOf(gameRooms[args.gameId].currentDrawer) + 1].username;
+  gameRooms[args.gameId].currentDrawer =
+    gameRooms[args.gameId].players[
+      gameRooms[args.gameId].players.indexOf(
+        gameRooms[args.gameId].currentDrawer
+      ) + 1
+    ].username;
   // clear drawing board
   gameRooms[args.gameId].drawingBoard = [];
   // clear chat messages
   gameRooms[args.gameId].chatMessages = [];
   // reset guess count for all players
   gameRooms[args.gameId].players.map((player) => {
-    player.guesses = 0;
-  }
-  );
+    player.guesses = 3;
+  });
   // call newRound function
   newRound(args);
 }
@@ -106,7 +121,13 @@ function handleCreateRoom(data, ws) {
       chatMessages: [],
     };
   }
-  gameRooms[gameId].players.push({ username: username, ws: ws });
+  gameRooms[gameId].players.push({
+    username: username,
+    score: 0,
+    guesses: 0,
+    guessedWordCorrectly: false,
+    ws: ws,
+  });
   updateAllPlayers(gameId);
 }
 
@@ -117,24 +138,34 @@ function handleJoinRoom(data, ws) {
 
   let roomData = gameRooms[gameId];
   if (!roomData) {
+    console.log("game id does not exist");
     ws.send(
       JSON.stringify({
         type: "game-error",
-        message: `Game ID, ${gameId}, does not exist`,  
+        message: `Game ID, ${gameId}, does not exist`,
       })
     );
-  } 
+    return;
+  }
   //check if username is already taken
-  else if (gameRooms[gameId].players.some((player) => player.username === username)) {
+  if (
+    gameRooms[gameId].players.some((player) => player.username === username)
+  ) {
+    console.log("username taken");
     ws.send(
       JSON.stringify({
         type: "game-error",
         message: `Username, ${username}, is already taken`,
       })
     );
-  }
-  else {
-    gameRooms[gameId].players.push({ username: username, ws: ws });
+  } else {
+    gameRooms[gameId].players.push({
+      username: username,
+      score: 0,
+      guesses: 0,
+      guessedWordCorrectly: false,
+      ws: ws,
+    });
     updateAllPlayers(gameId);
   }
 }
@@ -142,7 +173,8 @@ function handleJoinRoom(data, ws) {
 function handleStartGame(data, ws) {
   // ajay
   // set currentDrawer to host
-  gameRooms[data.message.gameId].currentDrawer = gameRooms[data.message.gameId].host;
+  gameRooms[data.message.gameId].currentDrawer =
+    gameRooms[data.message.gameId].host;
   // set guesses to 3
   gameRooms[data.message.gameId].players.map((curr_player) => {
     curr_player.guesses = 3;
@@ -160,8 +192,9 @@ function handleDraw(data, ws) {
 }
 
 function handleClose(data, ws) {
+  if (gameRooms[data.message.gameId]) {
   gameRooms[data.message.gameId].players.map((curr_player, index) => {
-    if (curr_player.username === data.message.username) {
+    if (curr_player.ws === ws) {
       gameRooms[data.message.gameId].players.splice(index, 1);
       if (
         curr_player.username === gameRooms[data.message.gameId].host &&
@@ -173,6 +206,12 @@ function handleClose(data, ws) {
               Math.random() * gameRooms[data.message.gameId].players.length
             )
           ].username;
+          if (
+            curr_player.username === gameRooms[data.message.gameId].currentDrawer
+          ) {
+            gameRooms[data.message.gameId].currentDrawer = gameRooms[data.message.gameId].host;
+          }
+          
       } else if (gameRooms[data.message.gameId].players.length == 0) {
         gameRooms[data.message.gameId] = null;
         console.log(
@@ -185,4 +224,5 @@ function handleClose(data, ws) {
   if (gameRooms[data.message.gameId]) {
     updateAllPlayers(data.message.gameId);
   }
+}
 }

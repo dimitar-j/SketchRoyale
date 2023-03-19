@@ -10,7 +10,7 @@ type serverResponse = {
   host: string;
   currentDrawer: string;
   currentWord: string;
-  players: [{ username: string }];
+  players: [{ username: string , score: number, guesses: number, guessedWordCorrectly: boolean}];
   gameState: string;
   chatMessages: [];
   drawingBoard: [];
@@ -36,7 +36,7 @@ export function ConnectionContextProvider({ children }: Props) {
     host: "",
     currentDrawer: "",
     currentWord: "",
-    players: [{ username: "" }],
+    players: [{ username: "" , score: 0, guesses: 0, guessedWordCorrectly: false}],
     gameState: "",
     chatMessages: [],
     drawingBoard: [],
@@ -138,7 +138,7 @@ export function ConnectionContextProvider({ children }: Props) {
       host: "",
       currentDrawer: "",
       currentWord: "",
-      players: [{ username: "" }],
+      players: [{ username: "" , score: 0, guesses: 0, guessedWordCorrectly: false,}],
       gameState: "",
       chatMessages: [],
       drawingBoard: [],
