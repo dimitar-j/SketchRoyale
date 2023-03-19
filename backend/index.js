@@ -49,12 +49,14 @@ function updateAllPlayers(gameId) {
           host: gameRooms[gameId].host,
           currentDrawer: gameRooms[gameId].currentDrawer,
           currentWord: gameRooms[gameId].currentWord,
-          players: gameRooms[gameId].players.map(({ username, score, guesses, guessedWordCorrectly }) => ({
-            username,
-            score,
-            guesses,
-            guessedWordCorrectly,
-          })),
+          players: gameRooms[gameId].players.map(
+            ({ username, score, guesses, guessedWordCorrectly }) => ({
+              username,
+              score,
+              guesses,
+              guessedWordCorrectly,
+            })
+          ),
           gameState: gameRooms[gameId].gameState,
           chatMessages: gameRooms[gameId].chatMessages,
           drawingBoard: gameRooms[gameId].drawingBoard,
@@ -189,40 +191,44 @@ function handleChat(data, ws) {
 
 function handleDraw(data, ws) {
   // dimitar
+  console.log("handling draw", data);
+  gameRooms[data.message.gameId].drawingBoard = data.message.drawing;
+  updateAllPlayers(data.message.gameId);
 }
 
 function handleClose(data, ws) {
   if (gameRooms[data.message.gameId]) {
-  gameRooms[data.message.gameId].players.map((curr_player, index) => {
-    if (curr_player.ws === ws) {
-      gameRooms[data.message.gameId].players.splice(index, 1);
-      if (
-        curr_player.username === gameRooms[data.message.gameId].host &&
-        gameRooms[data.message.gameId].players.length >= 1
-      ) {
-        gameRooms[data.message.gameId].host =
-          gameRooms[data.message.gameId].players[
-            Math.floor(
-              Math.random() * gameRooms[data.message.gameId].players.length
-            )
-          ].username;
+    gameRooms[data.message.gameId].players.map((curr_player, index) => {
+      if (curr_player.ws === ws) {
+        gameRooms[data.message.gameId].players.splice(index, 1);
+        if (
+          curr_player.username === gameRooms[data.message.gameId].host &&
+          gameRooms[data.message.gameId].players.length >= 1
+        ) {
+          gameRooms[data.message.gameId].host =
+            gameRooms[data.message.gameId].players[
+              Math.floor(
+                Math.random() * gameRooms[data.message.gameId].players.length
+              )
+            ].username;
           if (
-            curr_player.username === gameRooms[data.message.gameId].currentDrawer
+            curr_player.username ===
+            gameRooms[data.message.gameId].currentDrawer
           ) {
-            gameRooms[data.message.gameId].currentDrawer = gameRooms[data.message.gameId].host;
+            gameRooms[data.message.gameId].currentDrawer =
+              gameRooms[data.message.gameId].host;
           }
-          
-      } else if (gameRooms[data.message.gameId].players.length == 0) {
-        gameRooms[data.message.gameId] = null;
-        console.log(
-          "last player in the room, resetting gameID",
-          data.message.gameId
-        );
+        } else if (gameRooms[data.message.gameId].players.length == 0) {
+          gameRooms[data.message.gameId] = null;
+          console.log(
+            "last player in the room, resetting gameID",
+            data.message.gameId
+          );
+        }
       }
+    });
+    if (gameRooms[data.message.gameId]) {
+      updateAllPlayers(data.message.gameId);
     }
-  });
-  if (gameRooms[data.message.gameId]) {
-    updateAllPlayers(data.message.gameId);
   }
-}
 }
