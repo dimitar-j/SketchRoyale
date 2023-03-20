@@ -123,6 +123,7 @@ function endRound(args) {
   // reset guess count for all players
   gameRooms[args.gameId].players.map((player) => {
     player.guesses = 3;
+    player.guessedWordCorrectly = false;
   });
   // call newRound function
   newRound(args);
