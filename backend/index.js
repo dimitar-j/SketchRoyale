@@ -226,7 +226,11 @@ function handleChat(data, ws) {
       player.guesses -= 1;
       player.guessedWordCorrectly = correctGuess;
       if (correctGuess) {
-        player.score += 10; // TODO: calculation based on # of total guesses
+        player.score += Math.floor(
+          (1 / (gameRooms[data.message.gameId].chatMessages.length + 1)) *
+            player.guesses *
+            100
+        );
       }
     }
     return player;
