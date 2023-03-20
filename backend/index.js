@@ -78,23 +78,44 @@ function newRound(args) {
   gameRooms[args.gameId].gameState = "drawer-confirm-word";
   console.log("game state:", gameRooms[args.gameId].gameState);
   // update all players with the new game state
+  console.log("current drawer:", gameRooms[args.gameId].currentDrawer);
   updateAllPlayers(args.gameId);
 }
 
 function drawerConfirmWord(data, ws) {
   gameRooms[data.message.gameId].gameState = "game";
+  console.log("game state:", gameRooms[data.message.gameId].gameState);
   updateAllPlayers(data.message.gameId);
 }
 
 function endRound(args) {
   // jacob + gabe
   // set current drawer to next player
-  gameRooms[args.gameId].currentDrawer =
-    gameRooms[args.gameId].players[
-      gameRooms[args.gameId].players.indexOf(
-        gameRooms[args.gameId].currentDrawer
-      ) + 1
-    ].username;
+  if (
+    // if current drawer is last player in array
+    gameRooms[args.gameId].players.findIndex(
+      (player) => player.username === gameRooms[args.gameId].currentDrawer
+    ) ===
+    gameRooms[args.gameId].players.length - 1
+  ) {
+    gameRooms[args.gameId].currentDrawer =
+      gameRooms[args.gameId].players[0].username;
+    console.log("current drawer is last player in array");
+  } else {
+    // if current drawer is not last player in array
+    gameRooms[args.gameId].currentDrawer =
+      gameRooms[args.gameId].players[
+        gameRooms[args.gameId].players.findIndex(
+          (player) => player.username === gameRooms[args.gameId].currentDrawer
+        ) + 1
+      ].username;
+    console.log(
+      gameRooms[args.gameId].players.findIndex(
+        (player) => player.username === gameRooms[args.gameId].currentDrawer
+      )
+    );
+    console.log("current drawer is not last player in array");
+  }
   // clear drawing board
   gameRooms[args.gameId].drawingBoard = [];
   // clear chat messages
