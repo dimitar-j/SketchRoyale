@@ -203,9 +203,9 @@ function handleChat(data, ws) {
     if (player.username === data.message.username) {
       player.guesses -= 1;
       player.guessedWordCorrectly = correctGuess;
-    }
-    if (correctGuess) {
-      player.score += 10; // TODO: calculation based on # of total guesses
+      if (correctGuess) {
+        player.score += 10; // TODO: calculation based on # of total guesses
+      }
     }
     return player;
   });
