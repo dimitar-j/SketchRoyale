@@ -35,26 +35,29 @@ function Game() {
                 {localGameState.currentWord.toUpperCase()}
               </div>
               <div className="w-full">
-                <button onClick={handleDrawerConfirm} className="bg-red p-4 font-display text-3xl text-white w-full">
+                <button
+                  onClick={handleDrawerConfirm}
+                  className="bg-red p-4 font-display text-3xl text-white w-full"
+                >
                   GO!
                 </button>
               </div>
             </div>
           </div>
         </div>
-      )
+      );
     } else if (localGameState.currentDrawer !== username) {
       return (
         <div className="bg-blue w-[100vw] h-[100vh]">
           <div className="flex justify-center items-center w-full h-full">
             <div className="flex flex-col space-y-6 justify-center items-center bg-white rounded-lg shadow-2xl w-1/4 h-1/4 p-8">
               <div className="text-xl">
-                {"Waiting for the host to confirm word..."}
+                {"Waiting for the drawer to confirm word..."}
               </div>
             </div>
           </div>
         </div>
-      )
+      );
     }
   } else if (localGameState.gameState === "game") {
     return (
@@ -68,10 +71,7 @@ function Game() {
       </div>
     );
   }
-  return (
-    <div>
-    </div>
-  )
+  return <div></div>;
 }
 
 export default Game;

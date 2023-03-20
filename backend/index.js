@@ -123,6 +123,7 @@ function endRound(args) {
   // reset guess count for all players
   gameRooms[args.gameId].players.map((player) => {
     player.guesses = 3;
+    player.guessedWordCorrectly = false;
   });
   // call newRound function
   newRound(args);
@@ -224,9 +225,13 @@ function handleChat(data, ws) {
     if (player.username === data.message.username) {
       player.guesses -= 1;
       player.guessedWordCorrectly = correctGuess;
-    }
-    if (correctGuess) {
-      player.score += 10; // TODO: calculation based on # of total guesses
+      if (correctGuess) {
+        player.score += Math.floor(
+          (1 / (gameRooms[data.message.gameId].chatMessages.length + 1)) *
+            player.guesses *
+            100
+        );
+      }
     }
     return player;
   });
