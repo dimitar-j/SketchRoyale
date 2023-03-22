@@ -14,6 +14,9 @@ function Chat() {
             setGuessNum(player.guesses)
         }
     })
+    if(localGameState.host == username){
+        setChatDisable(true)
+    }
   },[localGameState])
   useEffect(() => {
     if(guessNum == 0){
@@ -50,7 +53,7 @@ function Chat() {
         <div>
           <div className="flex gap-2 w-full">
             <input
-              placeholder={chatDisable ? "Out of guesses!" : "Guess a word..."}
+              placeholder={chatDisable ? "Unable to guess!" : "Guess a word..."}
               className="grow col-span-3 border-2 p-2 min-w-0 border-black focus:outline-blue focus:rounded-none"
               value={newChat}
               onChange={(e) => setNewChat(e.target.value)}
