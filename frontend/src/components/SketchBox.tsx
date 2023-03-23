@@ -21,6 +21,9 @@ function SketchBox() {
     if (!isDrawing.current) {
       return;
     }
+    if (localGameState.currentDrawer !== username) {
+      return;
+    }
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
     let lastLine =
