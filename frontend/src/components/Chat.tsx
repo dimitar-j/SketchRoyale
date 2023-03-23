@@ -9,36 +9,35 @@ function Chat() {
   const [chatDisable, setChatDisable] = useState(false);
   const [guessNum, setGuessNum] = useState(3);
   useEffect(() => {
-    localGameState.players.map(player => {
-        if(player.username == username){
-            setGuessNum(player.guesses)
-        }
-    })
-    if(localGameState.host == username){
-        setChatDisable(true)
+    localGameState.players.map((player) => {
+      if (player.username == username) {
+        setGuessNum(player.guesses);
+      }
+    });
+    if (localGameState.host == username) {
+      setChatDisable(true);
     }
-  },[localGameState])
+  }, [localGameState]);
   useEffect(() => {
-    if(guessNum == 0){
-        setChatDisable(true)
+    if (guessNum == 0) {
+      setChatDisable(true);
+    } else {
+      setChatDisable(false);
     }
-    else{
-        setChatDisable(false)
-    }
-  },[guessNum])
+  }, [guessNum]);
 
   const sendChat = () => {
     handleNewChat(newChat);
     setNewChat("");
   };
-  
+
   return (
-    <div className="flex flex-col col-span-1">
+    <div className="flex flex-col col-span-1 h-full overflow-hidden">
       <div className="font-display text-white text-4xl pl-2 w-full text-center">
         Chat
       </div>
-      <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between">
-        <div className="flex flex-col gap-2">
+      <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between overflow-auto">
+        <div className="flex flex-col gap-2 h-full overflow-scroll">
           {localGameState.chatMessages.length
             ? localGameState.chatMessages?.map((c, index) => (
                 <ChatCard
@@ -51,7 +50,7 @@ function Chat() {
             : null}
         </div>
         <div>
-          <div className="flex gap-2 w-full">
+          <div className="flex gap-2 w-full py-2">
             <input
               placeholder={chatDisable ? "Unable to guess!" : "Guess a word..."}
               className="grow col-span-3 border-2 p-2 min-w-0 border-black focus:outline-blue focus:rounded-none"

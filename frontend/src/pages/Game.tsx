@@ -27,7 +27,7 @@ function Game() {
       return (
         <div className="bg-blue w-[100vw] h-[100vh]">
           <div className="flex justify-center items-center w-full h-full">
-            <div className="flex flex-col space-y-6 justify-center items-center bg-white rounded-lg shadow-2xl w-1/4 h-1/4 p-8">
+            <div className="flex flex-col space-y-6 justify-center items-center bg-white rounded-lg shadow-2xl p-8">
               <div className="text-xl">
                 {"You are the drawer! Your word is: "}
               </div>
@@ -63,7 +63,7 @@ function Game() {
     return (
       <div className="bg-blue w-[100vw] h-[100vh]">
         <NavBar />
-        <div className=" py-16 px-8 grid grid-cols-4 gap-4 relative">
+        <div className=" py-16 px-8 grid grid-cols-4 gap-4 h-full relative">
           <Scores></Scores>
           <SketchBox></SketchBox>
           <Chat></Chat>

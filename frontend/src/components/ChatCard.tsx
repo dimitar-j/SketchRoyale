@@ -12,7 +12,7 @@ function ChatCard(props: Props) {
   return (
     <div
       className={`bg-${
-        props.correct ? "[#C0E1C1]" : "white"
+        props.correct ? "[#9cc069]" : "white"
       } shadow-md p-4 flex gap-2 items-center`}
     >
       <img src={Avatar}></img>
