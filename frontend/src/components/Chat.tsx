@@ -14,7 +14,7 @@ function Chat() {
         setGuessNum(player.guesses);
       }
     });
-    if (localGameState.host == username) {
+    if (localGameState.currentDrawer == username) {
       setChatDisable(true);
     }
   }, [localGameState]);
@@ -73,7 +73,7 @@ function Chat() {
               <img src={Plane}></img>
             </button>
           </div>
-          <p>{`Remaining Guesses: ${getRemainingGuesses()}`}</p>
+          {!chatDisable && <p>{`Remaining Guesses: ${getRemainingGuesses()}`}</p>}
         </div>
       </div>
     </div>
