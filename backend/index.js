@@ -7,6 +7,7 @@ let gameRooms = [];
 wss.on("connection", function connection(ws) {
   ws.on("message", function incoming(message) {
     const data = JSON.parse(message);
+    console.log(data);
     switch (data.type) {
       case "create-room":
         console.log("incoming create room message");

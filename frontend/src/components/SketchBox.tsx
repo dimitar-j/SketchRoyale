@@ -43,6 +43,9 @@ function SketchBox() {
 
   const handleMouseUp = () => {
     isDrawing.current = false;
+    if (localGameState.currentDrawer !== username) {
+      return;
+    }
     sendDrawing();
   };
 
