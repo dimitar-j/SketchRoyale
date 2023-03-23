@@ -31,6 +31,13 @@ function Chat() {
     setNewChat("");
   };
 
+  const getRemainingGuesses = () => {
+    const idx = localGameState.players.findIndex(
+      (player) => player.username === username
+    );
+    return localGameState.players[idx].guesses;
+  };
+
   return (
     <div className="flex flex-col col-span-1 h-full overflow-hidden">
       <div className="font-display text-white text-4xl pl-2 w-full text-center">
@@ -66,6 +73,7 @@ function Chat() {
               <img src={Plane}></img>
             </button>
           </div>
+          <p>{`Remaining Guesses: ${getRemainingGuesses()}`}</p>
         </div>
       </div>
     </div>
