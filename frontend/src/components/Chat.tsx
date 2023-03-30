@@ -5,9 +5,9 @@ import { useConnectionContext } from "../context/ConnectionContext";
 
 function Chat() {
   const [newChat, setNewChat] = useState("");
-  const { handleNewChat, localGameState, username } = useConnectionContext();
+  const { handleNewChat, localGameState, localChatMessageState, username } =
+    useConnectionContext();
   const [guessNum, setGuessNum] = useState(3);
-  console.log(localGameState)
   useEffect(() => {
     localGameState.players.map((player) => {
       if (player.username == username) {
@@ -34,35 +34,49 @@ function Chat() {
       </div>
       <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between overflow-auto">
         <div className="flex flex-col gap-2 h-full overflow-scroll">
-          {localGameState.chatMessages.length
-            ? localGameState.chatMessages?.map((c, index) => (
+          {localChatMessageState.length > 0 &&
+            localChatMessageState.map((c, index) => {
+              console.log(c);
+              return (
                 <ChatCard
                   key={index}
                   name={c["username"]}
                   chat={c["message"]}
                   correct={c["message"] === localGameState.currentWord}
                 ></ChatCard>
-              ))
-            : null}
+              );
+            })}
         </div>
         <div>
           <div className="flex gap-2 w-full py-2">
             <input
-              placeholder={(localGameState.currentDrawer == username || guessNum == 0) ? "Unable to guess!" : "Guess a word..."}
+              placeholder={
+                localGameState.currentDrawer == username || guessNum == 0
+                  ? "Unable to guess!"
+                  : "Guess a word..."
+              }
               className="grow col-span-3 border-2 p-2 min-w-0 border-black focus:outline-blue focus:rounded-none"
               value={newChat}
               onChange={(e) => setNewChat(e.target.value)}
-              disabled={(localGameState.currentDrawer == username || guessNum == 0)}
+              disabled={
+                localGameState.currentDrawer == username || guessNum == 0
+              }
             ></input>
             <button
               className="flex-none w-14 h-14 items-center justify-center col-span-1 font-display bg-red text-white p-2 text-xl disabled:bg-gray-400 disabled:text-black transition duration-200 shadow-md"
               onClick={sendChat}
-              disabled={newChat === "" || (localGameState.currentDrawer == username || guessNum == 0)}
+              disabled={
+                newChat === "" ||
+                localGameState.currentDrawer == username ||
+                guessNum == 0
+              }
             >
               <img src={Plane}></img>
             </button>
           </div>
-          {!(localGameState.currentDrawer == username) && <p>{`Remaining Guesses: ${getRemainingGuesses()}`}</p>}
+          {!(localGameState.currentDrawer == username) && (
+            <p>{`Remaining Guesses: ${getRemainingGuesses()}`}</p>
+          )}
         </div>
       </div>
     </div>

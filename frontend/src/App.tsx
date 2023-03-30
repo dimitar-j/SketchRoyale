@@ -6,7 +6,6 @@ import "./App.css";
 import Home from "./pages/Home";
 import Lobby from "./pages/Lobby";
 import Game from "./pages/Game";
-// import TestToDoList from ' ./pages/TestToDoList'
 import { ConnectionContextProvider } from "./context/ConnectionContext";
 
 function App() {
@@ -18,7 +17,6 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/lobby/:id" element={<Lobby />} />
             <Route path="/game/:id" element={<Game />} />
-            {/* <Route path="/test" element={<TestToDoList />} /> */}
           </Routes>
         </ConnectionContextProvider>
       </BrowserRouter>

@@ -4,8 +4,13 @@ import { Stage, Layer, Line, Text } from "react-konva";
 import { useConnectionContext } from "../context/ConnectionContext";
 
 function SketchBox() {
-  const { localGameState, username, sendDrawing, handleDrawing } =
-    useConnectionContext();
+  const {
+    localGameState,
+    localDrawingBoardState,
+    username,
+    sendDrawing,
+    handleDrawing,
+  } = useConnectionContext();
   //const [lines, setLines] = useState<Array<{ points: number[] }>>([]);
   const isDrawing = useRef<boolean>(false);
   const parentRef = useRef<HTMLDivElement>(null);
@@ -13,7 +18,7 @@ function SketchBox() {
   const handleMouseDown = (e: any) => {
     isDrawing.current = true;
     const pos = e.target.getStage().getPointerPosition();
-    handleDrawing([...localGameState.drawingBoard, { points: [pos.x, pos.y] }]);
+    handleDrawing([...localDrawingBoardState, { points: [pos.x, pos.y] }]);
   };
 
   const handleMouseMove = (e: any) => {
@@ -26,19 +31,18 @@ function SketchBox() {
     }
     const stage = e.target.getStage();
     const point = stage.getPointerPosition();
-    let lastLine =
-      localGameState.drawingBoard[localGameState.drawingBoard.length - 1];
+    let lastLine = localDrawingBoardState[localDrawingBoardState.length - 1];
     // add point
     lastLine.points = lastLine.points.concat([point.x, point.y]);
 
     // replace last
-    localGameState.drawingBoard.splice(
-      localGameState.drawingBoard.length - 1,
+    localDrawingBoardState.splice(
+      localDrawingBoardState.length - 1,
       1,
       lastLine
     );
     //setLines([...lines]);
-    handleDrawing(localGameState.drawingBoard);
+    handleDrawing(localDrawingBoardState);
   };
 
   const handleMouseUp = () => {
@@ -72,18 +76,19 @@ function SketchBox() {
           onMouseUp={handleMouseUp}
         >
           <Layer>
-            {localGameState.drawingBoard.map((line, i) => (
-              <Line
-                key={i}
-                points={line["points"]}
-                stroke="#FE5A43"
-                strokeWidth={5}
-                tension={0.5}
-                lineCap="round"
-                lineJoin="round"
-                globalCompositeOperation={"source-over"}
-              />
-            ))}
+            {localDrawingBoardState.length > 0 &&
+              localDrawingBoardState.map((line, i) => (
+                <Line
+                  key={i}
+                  points={line["points"]}
+                  stroke="#FE5A43"
+                  strokeWidth={5}
+                  tension={0.5}
+                  lineCap="round"
+                  lineJoin="round"
+                  globalCompositeOperation={"source-over"}
+                />
+              ))}
           </Layer>
         </Stage>
       </div>

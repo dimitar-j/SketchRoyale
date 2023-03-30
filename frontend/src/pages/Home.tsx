@@ -8,8 +8,9 @@ function Home() {
   const [gameId, setGameId] = useState("");
   const [username, setUsername] = useState("");
   const [hostname, setHostname] = useState("");
-  const { joinRoomContext, localGameState, loading, setLoading } = useConnectionContext();
-  
+  const { joinRoomContext, localGameState, loading, setLoading } =
+    useConnectionContext();
+
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -31,8 +32,7 @@ function Home() {
   async function generateGameId() {
     var minm = 100000;
     var maxm = 999999;
-    const id = Math.floor(Math
-      .random() * (maxm - minm + 1)) + minm;
+    const id = Math.floor(Math.random() * (maxm - minm + 1)) + minm;
     console.log(id);
     console.log(id.toString());
     return id.toString();
@@ -52,15 +52,18 @@ function Home() {
   };
 
   useEffect(() => {
-    if (localGameState.gameState === "lobby"){
+    if (localGameState.gameState === "lobby") {
       setLoading(false);
       navigate("/lobby/" + localGameState.gameId);
     }
-    if (localGameState.gameState === "game" || localGameState.gameState === "drawer-confirm-word"){
+    if (
+      localGameState.gameState === "game" ||
+      localGameState.gameState === "drawer-confirm-word"
+    ) {
       setLoading(false);
       navigate("/game/" + localGameState.gameId);
     }
-  }, [localGameState])
+  }, [localGameState]);
 
   const Banner = () => {
     return (
@@ -120,12 +123,13 @@ function Home() {
     );
   };
 
-  return (
-    loading ? <LoadingScreen /> :
-      <div className="w-full h-[100vh] flex">
-        {Banner()}
-        {Card()}
-      </div>
+  return loading ? (
+    <LoadingScreen />
+  ) : (
+    <div className="w-full h-[100vh] flex">
+      {Banner()}
+      {Card()}
+    </div>
   );
 }
 

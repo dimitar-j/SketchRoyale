@@ -29,12 +29,7 @@ function Lobby() {
     }
   }, [localGameState]);
 
-  useEffect(() => {
-    console.log(username);
-  }, []);
-
   const Card = () => {
-    console.log(localGameState);
     return (
       <div className="mt-6 bg-white rounded-lg p-8 shadow-2xl max-h-96 overflow-y-scroll">
         {localGameState.players.map(

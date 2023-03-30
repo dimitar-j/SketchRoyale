@@ -5,11 +5,12 @@ interface Props {
   children: React.ReactNode | React.ReactNode[];
 }
 
-type serverResponse = {
+type gameStateType = {
   gameId: number;
   host: string;
   currentDrawer: string;
   currentWord: string;
+  gameState: string;
   players: [
     {
       username: string;
@@ -18,9 +19,15 @@ type serverResponse = {
       guessedWordCorrectly: boolean;
     }
   ];
-  gameState: string;
-  chatMessages: { username: string; message: string }[];
-  drawingBoard: { points: number[] }[];
+};
+
+type chatMessageType = {
+  username: string;
+  message: string;
+};
+
+type drawingBoardtype = {
+  points: number[];
 };
 
 type ConnectionContextType = {
@@ -29,7 +36,9 @@ type ConnectionContextType = {
     gameId: string;
     type: string;
   }) => void;
-  localGameState: serverResponse;
+  localGameState: gameStateType;
+  localChatMessageState: chatMessageType[];
+  localDrawingBoardState: drawingBoardtype[];
   startGame: () => void;
   resetLocalVars: () => void;
   sendDrawing: () => void;
@@ -46,18 +55,23 @@ const connectionContext = createContext<ConnectionContextType>(
 );
 
 export function ConnectionContextProvider({ children }: Props) {
-  const [localGameState, setLocalGameState] = useState<serverResponse>({
+  const [localGameState, setLocalGameState] = useState<gameStateType>({
     gameId: 0,
     host: "",
     currentDrawer: "",
     currentWord: "",
+    gameState: "",
     players: [
       { username: "", score: 0, guesses: 0, guessedWordCorrectly: false },
     ],
-    gameState: "",
-    chatMessages: [],
-    drawingBoard: [],
   });
+  const [localChatMessageState, setLocalChatMessageType] = useState<
+    chatMessageType[]
+  >([] as any);
+  const [localDrawingBoardState, setLocalDrawingBoardState] = useState<
+    drawingBoardtype[]
+  >([] as any);
+
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameId, setGameId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -112,7 +126,19 @@ export function ConnectionContextProvider({ children }: Props) {
       const response = JSON.parse(event.data);
       console.log("Response received from WS: ", response);
       if (response.type === "join-message") {
-        setLocalGameState(response.message);
+        console.log(response.message);
+        const { gameId, host, currentDrawer, currentWord, players, gameState } =
+          response.message;
+        setLocalGameState({
+          gameId,
+          host,
+          currentDrawer,
+          currentWord,
+          players,
+          gameState,
+        });
+        setLocalDrawingBoardState(response.message.drawingBoard);
+        setLocalChatMessageType(response.message.chatMessages);
       }
       if (response.type === "game-error") {
         console.log(response.message);
@@ -170,20 +196,22 @@ export function ConnectionContextProvider({ children }: Props) {
   const sendDrawing = () => {
     console.log("sending drawing to server");
     if (ws && ws.readyState === WebSocket.OPEN) {
-      const data = {
-        type: "draw",
-        message: {
-          gameId,
-          drawing: localGameState.drawingBoard,
-        },
-      };
-      ws.send(JSON.stringify(data));
+      if (localDrawingBoardState) {
+        const data = {
+          type: "draw",
+          message: {
+            gameId,
+            drawing: localDrawingBoardState,
+          },
+        };
+        ws.send(JSON.stringify(data));
+      }
     }
   };
 
   const handleDrawing = (drawing: Array<{ points: number[] }>) => {
     console.log("updating localgamestate drawing", drawing);
-    setLocalGameState({ ...localGameState, drawingBoard: drawing });
+    setLocalDrawingBoardState(drawing);
   };
 
   const handleNewChat = (chat: string) => {
@@ -207,13 +235,18 @@ export function ConnectionContextProvider({ children }: Props) {
       host: "",
       currentDrawer: "",
       currentWord: "",
-      players: [
-        { username: "", score: 0, guesses: 0, guessedWordCorrectly: false },
-      ],
       gameState: "",
-      chatMessages: [],
-      drawingBoard: [],
+      players: [
+        {
+          username: "",
+          score: 0,
+          guesses: 0,
+          guessedWordCorrectly: false,
+        },
+      ],
     });
+    setLocalDrawingBoardState([] as any);
+    setLocalChatMessageType([] as any);
     if (ws && ws.readyState === WebSocket.OPEN) {
       const closeMessage = {
         type: "close",
@@ -232,6 +265,8 @@ export function ConnectionContextProvider({ children }: Props) {
       value={{
         joinRoomContext,
         localGameState,
+        localChatMessageState,
+        localDrawingBoardState,
         startGame,
         resetLocalVars,
         username,

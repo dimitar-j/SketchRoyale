@@ -12,7 +12,6 @@ function Game() {
   const { localGameState, username, drawerConfirmed } = useConnectionContext();
   const navigate = useNavigate();
   useEffect(() => {
-    console.log(localGameState);
     if (localGameState.gameId == 0) {
       navigate("/");
     }
