@@ -1,6 +1,7 @@
 var randomWords = require("random-words");
 const WebSocket = require("ws");
 const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
+const fs = require("fs");
 
 let gameRooms = [];
 
@@ -68,10 +69,16 @@ function updateAllPlayers(gameId) {
   });
 }
 
+function getRandomWord() {
+  const words = fs.readFileSync("words.txt", "utf-8").split(", ");
+  const randomIndex = Math.floor(Math.random() * words.length);
+  return words[randomIndex].slice(1, -1);
+}
+
 function newRound(args) {
   // jacob
   // generate new word
-  const randomWord = randomWords();
+  const randomWord = getRandomWord();
   // set current word to new word
   gameRooms[args.gameId].currentWord = randomWord;
   console.log("new round, new word:", randomWord);
