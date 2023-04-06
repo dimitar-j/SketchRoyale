@@ -11,6 +11,9 @@ function SketchBox() {
   const parentRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: any) => {
+    if (localGameState.currentDrawer !== username) {
+      return;
+    }
     isDrawing.current = true;
     const pos = e.target.getStage().getPointerPosition();
     handleDrawing([...localGameState.drawingBoard, { points: [pos.x, pos.y] }]);

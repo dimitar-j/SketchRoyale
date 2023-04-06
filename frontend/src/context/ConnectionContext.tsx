@@ -19,8 +19,12 @@ type serverResponse = {
     }
   ];
   gameState: string;
-  chatMessages: { username: string; message: string }[];
   drawingBoard: { points: number[] }[];
+};
+
+type chatMessageType = {
+  username: string;
+  message: string;
 };
 
 type ConnectionContextType = {
@@ -39,6 +43,7 @@ type ConnectionContextType = {
   username: String;
   drawerConfirmed: () => void;
   handleNewChat: (chat: string) => void;
+  localChatMessageState: chatMessageType[];
 };
 
 const connectionContext = createContext<ConnectionContextType>(
@@ -55,9 +60,12 @@ export function ConnectionContextProvider({ children }: Props) {
       { username: "", score: 0, guesses: 0, guessedWordCorrectly: false },
     ],
     gameState: "",
-    chatMessages: [],
     drawingBoard: [],
   });
+  const [localChatMessageState, setLocalChatMessageState] = useState<
+    chatMessageType[]
+  >([] as any);
+
   const [ws, setWs] = useState<WebSocket | null>(null);
   const [gameId, setGameId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -73,7 +81,6 @@ export function ConnectionContextProvider({ children }: Props) {
     // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
     const newWs = new WebSocket("ws://localhost:8080");
     newWs.onopen = () => {
-      console.log("connected");
       setWs(newWs);
       setGameId(data.gameId);
       setUsername(data.username);
@@ -112,10 +119,28 @@ export function ConnectionContextProvider({ children }: Props) {
       const response = JSON.parse(event.data);
       console.log("Response received from WS: ", response);
       if (response.type === "join-message") {
-        setLocalGameState(response.message);
+        const {
+          gameId,
+          host,
+          currentDrawer,
+          currentWord,
+          players,
+          gameState,
+          chatMessages,
+          drawingBoard,
+        } = response.message;
+        setLocalGameState({
+          gameId,
+          host,
+          currentDrawer,
+          currentWord,
+          players,
+          gameState,
+          drawingBoard,
+        });
+        setLocalChatMessageState(chatMessages);
       }
       if (response.type === "game-error") {
-        console.log(response.message);
         alert(response.message);
         resetLocalVars();
         setLoading(false);
@@ -124,9 +149,7 @@ export function ConnectionContextProvider({ children }: Props) {
     };
 
     window.addEventListener("beforeunload", () => {
-      console.log("abcd");
       if (newWs && newWs.readyState === WebSocket.OPEN) {
-        console.log("abc");
         const closeMessage = {
           type: "close",
           message: {
@@ -182,7 +205,6 @@ export function ConnectionContextProvider({ children }: Props) {
   };
 
   const handleDrawing = (drawing: Array<{ points: number[] }>) => {
-    console.log("updating localgamestate drawing", drawing);
     setLocalGameState({ ...localGameState, drawingBoard: drawing });
   };
 
@@ -211,9 +233,9 @@ export function ConnectionContextProvider({ children }: Props) {
         { username: "", score: 0, guesses: 0, guessedWordCorrectly: false },
       ],
       gameState: "",
-      chatMessages: [],
       drawingBoard: [],
     });
+    setLocalChatMessageState([] as any);
     if (ws && ws.readyState === WebSocket.OPEN) {
       const closeMessage = {
         type: "close",
@@ -241,6 +263,7 @@ export function ConnectionContextProvider({ children }: Props) {
         sendDrawing,
         handleDrawing,
         handleNewChat,
+        localChatMessageState,
       }}
     >
       {children}

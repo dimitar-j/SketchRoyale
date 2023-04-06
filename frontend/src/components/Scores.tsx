@@ -5,11 +5,6 @@ import { useConnectionContext } from "../context/ConnectionContext";
 function Scores() {
   const { localGameState, username } = useConnectionContext();
 
-  console.log(
-    localGameState.players.map(
-      (player) => "username:" + player.username + "score:" + player.score
-    )
-  );
   return (
     <div className="flex flex-col col-span-1 h-full overflow-hidden">
       <div className="font-display text-white text-4xl pl-2 w-full text-center">
