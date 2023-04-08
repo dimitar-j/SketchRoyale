@@ -50,7 +50,13 @@ function Chat() {
           <div className="flex gap-2 w-full py-2">
             <input
               placeholder={
-                localGameState.currentDrawer == username || guessNum == 0
+                localGameState.currentDrawer == username ||
+                (localGameState.players.length > 0 &&
+                  localGameState.players.find((p) => p.username === username)!
+                    .guesses == 0) ||
+                (localGameState.players.length > 0 &&
+                  localGameState.players.find((p) => p.username === username)!
+                    .guessedWordCorrectly == true)
                   ? "Unable to guess!"
                   : "Guess a word..."
               }
@@ -58,7 +64,13 @@ function Chat() {
               value={newChat}
               onChange={(e) => setNewChat(e.target.value)}
               disabled={
-                localGameState.currentDrawer == username || guessNum == 0
+                localGameState.currentDrawer == username ||
+                (localGameState.players.length > 0 &&
+                  localGameState.players.find((p) => p.username === username)!
+                    .guesses == 0) ||
+                (localGameState.players.length > 0 &&
+                  localGameState.players.find((p) => p.username === username)!
+                    .guessedWordCorrectly == true)
               }
             ></input>
             <button
@@ -67,7 +79,12 @@ function Chat() {
               disabled={
                 newChat === "" ||
                 localGameState.currentDrawer == username ||
-                guessNum == 0
+                (localGameState.players.length > 0 &&
+                  localGameState.players.find((p) => p.username === username)!
+                    .guesses == 0) ||
+                (localGameState.players.length > 0 &&
+                  localGameState.players.find((p) => p.username === username)!
+                    .guessedWordCorrectly == true)
               }
             >
               <img src={Plane}></img>
