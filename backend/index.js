@@ -323,6 +323,7 @@ function handleChat(data, ws) {
       player.guesses -= 1;
       player.guessedWordCorrectly = correctGuess;
       if (correctGuess) {
+        player.guesses = 0;
         player.score += Math.floor(
           (1 / (gameRooms[data.message.gameId].chatMessages.length + 1)) *
             player.guesses *
@@ -359,7 +360,6 @@ function handleChat(data, ws) {
 }
 
 function handleDraw(data, ws) {
-  // dimitar
   console.log("handling draw", data);
   gameRooms[data.message.gameId].drawingBoard = data.message.drawing;
   updateAllPlayers(data.message.gameId);
@@ -371,6 +371,30 @@ function handleClose(data, ws) {
       if (curr_player.ws === ws) {
         gameRooms[data.message.gameId].players.splice(index, 1);
         if (
+          // if the player leaving is drawing and not the last player in the room, then just end the round.
+          curr_player.username === gameRooms[data.message.gameId].currentDrawer
+        ) {
+          if (gameRooms[data.message.gameId].players.length != 0) {
+            console.log("player leaving is the current drawer");
+            if (
+              // if the player leaving the room is the host, and there's still other players, then set it to a random new host
+              curr_player.username === gameRooms[data.message.gameId].host &&
+              gameRooms[data.message.gameId].players.length >= 1
+            ) {
+              gameRooms[data.message.gameId].host =
+                gameRooms[data.message.gameId].players[
+                  Math.floor(
+                    Math.random() *
+                      gameRooms[data.message.gameId].players.length
+                  )
+                ].username;
+            }
+            endRound(data.message);
+            return;
+          }
+        }
+        if (
+          // if the player leaving the room is the host, and there's still other players, then set it to a random new host
           curr_player.username === gameRooms[data.message.gameId].host &&
           gameRooms[data.message.gameId].players.length >= 1
         ) {
@@ -380,14 +404,8 @@ function handleClose(data, ws) {
                 Math.random() * gameRooms[data.message.gameId].players.length
               )
             ].username;
-          if (
-            curr_player.username ===
-            gameRooms[data.message.gameId].currentDrawer
-          ) {
-            gameRooms[data.message.gameId].currentDrawer =
-              gameRooms[data.message.gameId].host;
-          }
         } else if (gameRooms[data.message.gameId].players.length == 0) {
+          // if the player leaving is the last player in the room, then reset the gameID
           gameRooms[data.message.gameId] = null;
           console.log(
             "last player in the room, resetting gameID",
@@ -397,7 +415,28 @@ function handleClose(data, ws) {
       }
     });
     if (gameRooms[data.message.gameId]) {
-      updateAllPlayers(data.message.gameId);
+      let shouldEndRound = true; // checking to see if we should end the round
+      if (gameRooms[data.message.gameId].players.length > 0) {
+        gameRooms[data.message.gameId].players.forEach((curr_player) => {
+          if (
+            curr_player.username !==
+            gameRooms[data.message.gameId].currentDrawer
+          ) {
+            if (curr_player.guesses >= 1) {
+              shouldEndRound = false;
+            }
+          }
+        });
+      }
+      if (shouldEndRound) {
+        console.log(
+          "all players guessed correctly, but the person leaving is the last one. ending the round."
+        );
+        endRound(data.message);
+        return;
+      } else {
+        updateAllPlayers(data.message.gameId);
+      }
     }
   }
 }

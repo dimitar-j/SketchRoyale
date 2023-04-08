@@ -44,7 +44,10 @@ function Lobby() {
               className="flex flex-row] border-b border-black py-4 gap-4 items-center"
             >
               <img src={Avatar} className=""></img>
-              <div className="font-san">{player.username}</div>
+              <div className="font-san">
+                {player.username}
+                {player.username === username && " (you)"}
+              </div>
               {player.username === localGameState.host && (
                 <img src="/star-solid.svg" width="15" height="15" />
               )}
