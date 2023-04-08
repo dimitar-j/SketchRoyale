@@ -10,7 +10,7 @@ function Scores() {
       <div className="font-display text-white text-4xl pl-2 w-full text-center">
         scores
       </div>
-      <div className="bg-[#e7e7e7] h-full p-4 flex flex-col gap-2 overflow-scroll">
+      <div className="bg-[#e7e7e7] h-full p-4 flex flex-col gap-2 overflow-auto">
         {localGameState.players.map((s, index) => (
           <ScoreCard key={index} name={s.username} score={s.score}></ScoreCard>
         ))}

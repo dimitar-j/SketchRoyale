@@ -33,7 +33,7 @@ function Chat() {
         Chat
       </div>
       <div className="bg-[#e7e7e7] h-full p-4 flex flex-col w-full justify-between overflow-auto">
-        <div className="flex flex-col gap-2 h-full overflow-scroll">
+        <div className="flex flex-col gap-2 h-full overflow-auto">
           {localChatMessageState.length > 0 &&
             localChatMessageState.map((c, index) => {
               return (
