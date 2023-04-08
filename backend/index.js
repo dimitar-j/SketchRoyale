@@ -1,8 +1,13 @@
 var randomWords = require("random-words");
 const WebSocket = require("ws");
-const wss = new WebSocket.Server({ port: process.env.PORT || 8080 });
+const wss = new WebSocket.Server({ port: process.argv[2] || 8080 });
 const fs = require("fs");
-
+// map all server URLs and their socket connections
+const servers = {
+  "ws://localhost:8080": null,
+  "ws://localhost:8081": null,
+  "ws://localhost:8082": null,
+};
 let gameRooms = [];
 
 wss.on("connection", function connection(ws) {
@@ -38,11 +43,16 @@ wss.on("connection", function connection(ws) {
         console.log("incoming close message");
         handleClose(data, ws);
         break;
+      case "gamestate-update":
+        console.log("income update from primary server");
+        handleStateUpdate(data);
+        break;
     }
   });
 });
 
 function updateAllPlayers(gameId) {
+  // update all players
   gameRooms[gameId].players.map((curr_player) => {
     curr_player.ws.send(
       JSON.stringify({
@@ -67,6 +77,81 @@ function updateAllPlayers(gameId) {
       })
     );
   });
+  // update all replica servers
+  updateServers(gameId);
+}
+
+function updateServers(gameId) {
+  for (const server in servers) {
+    // get port of server
+    const port = server.split(":")[2];
+    // update all other servers except for self by checking the port
+    if (port !== process.argv[2]) {
+      // if there is no socket connection with server, create one
+      let ws = servers[server];
+      if (ws === null) {
+        ws = new WebSocket(server);
+        servers[server] = ws;
+        ws.onopen = () => {
+          console.log(`successfully connected to socket for ${server}`);
+          console.log("SENDING GAME STATE UPDATE");
+          const data = {
+            type: "gamestate-update",
+            message: {
+              gameId: gameId,
+              host: gameRooms[gameId].host,
+              currentDrawer: gameRooms[gameId].currentDrawer,
+              currentWord: gameRooms[gameId].currentWord,
+              players: gameRooms[gameId].players.map(
+                ({ username, score, guesses, guessedWordCorrectly }) => ({
+                  username,
+                  score,
+                  guesses,
+                  guessedWordCorrectly,
+                })
+              ),
+              gameState: gameRooms[gameId].gameState,
+              chatMessages: gameRooms[gameId].chatMessages,
+              drawingBoard: gameRooms[gameId].drawingBoard,
+            },
+          };
+          ws.send(JSON.stringify(data));
+        };
+        ws.onerror = (error) => {
+          console.log(`WebSocket Error while connecting to ${server}: `, error);
+        };
+        ws.onclose = () => {
+          console.log(`socket connection to ${server} closed`);
+        };
+      } else {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          console.log("SENDING GAME STATE UPDATE");
+          const data = {
+            type: "gamestate-update",
+            message: {
+              gameId: gameId,
+              host: gameRooms[gameId].host,
+              currentDrawer: gameRooms[gameId].currentDrawer,
+              currentWord: gameRooms[gameId].currentWord,
+              players: gameRooms[gameId].players.map(
+                ({ username, score, guesses, guessedWordCorrectly }) => ({
+                  username,
+                  score,
+                  guesses,
+                  guessedWordCorrectly,
+                })
+              ),
+              gameState: gameRooms[gameId].gameState,
+              chatMessages: gameRooms[gameId].chatMessages,
+              drawingBoard: gameRooms[gameId].drawingBoard,
+            },
+          };
+          ws.send(JSON.stringify(data));
+        }
+      }
+      console.log(`sent update to ${server} from port ${port}`);
+    }
+  }
 }
 
 function getRandomWord() {
@@ -311,4 +396,17 @@ function handleClose(data, ws) {
       updateAllPlayers(data.message.gameId);
     }
   }
+}
+
+function handleStateUpdate(data) {
+  gameRooms[data.message.gameId] = {
+    host: data.message.host,
+    currentDrawer: data.message.currentDrawer,
+    currentWord: data.message.currentWord,
+    players: data.message.players,
+    gameState: data.message.gameState,
+    chatMessages: data.message.chatMessages,
+    drawingBoard: data.message.drawingBoard,
+  };
+  console.log("Received update from primary", gameRooms[data.message.gameId]);
 }
