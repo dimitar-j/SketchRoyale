@@ -44,8 +44,12 @@ wss.on("connection", function connection(ws) {
         handleClose(data, ws);
         break;
       case "gamestate-update":
-        console.log("income update from primary server");
+        console.log("incoming update from primary server");
         handleStateUpdate(data);
+        break;
+      case "introduce":
+        console.log("incoming introduction message");
+        handleIntroduction(data, ws);
         break;
     }
   });
@@ -139,6 +143,7 @@ function updateServers(gameId) {
                   score,
                   guesses,
                   guessedWordCorrectly,
+                  ws,
                 })
               ),
               gameState: gameRooms[gameId].gameState,
@@ -182,7 +187,6 @@ function drawerConfirmWord(data, ws) {
 }
 
 function endRound(args) {
-  // jacob + gabe
   // set current drawer to next player
   if (
     // if current drawer is last player in array
@@ -409,4 +413,13 @@ function handleStateUpdate(data) {
     drawingBoard: data.message.drawingBoard,
   };
   console.log("Received update from primary", gameRooms[data.message.gameId]);
+}
+
+function handleIntroduction(data, ws) {
+  gameRooms[data.message.gameId].players.map((player) => {
+    if (player.username === data.message.username) {
+      console.log("updated ws for", player.username);
+      player.ws = ws;
+    }
+  });
 }

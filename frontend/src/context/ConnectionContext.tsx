@@ -71,6 +71,91 @@ export function ConnectionContextProvider({ children }: Props) {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const [username, setUsername] = useState<String>("");
+  const [primary, setPrimary] = useState(0);
+  const servers = [
+    "ws://localhost:8080",
+    "ws://localhost:8081",
+    "ws://localhost:8082",
+  ];
+
+  const connectToServer = (index: number, gameId: string, username: string) => {
+    // connect to websocket
+    // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
+    const newWs = new WebSocket(servers[index]);
+    console.log(`Attempting to connect to ${servers[index]}`);
+    newWs.onopen = () => {
+      setWs(newWs);
+      setPrimary(index);
+
+      const data = {
+        type: "introduce",
+        message: {
+          gameId,
+          username,
+        },
+      };
+      // send join message
+      console.log("data", data);
+      newWs.send(JSON.stringify(data));
+    };
+
+    newWs.onerror = (error) => {
+      console.log("WebSocket Error: ", error);
+      connectToServer((index + 1) % servers.length, gameId, username);
+    };
+
+    newWs.onclose = () => {
+      console.log("Primary server has disconnected");
+      connectToServer((index + 1) % servers.length, gameId, username);
+    };
+
+    newWs.onmessage = (event) => {
+      const response = JSON.parse(event.data);
+      console.log("Response received from WS: ", response);
+      if (response.type === "join-message") {
+        const {
+          gameId,
+          host,
+          currentDrawer,
+          currentWord,
+          players,
+          gameState,
+          chatMessages,
+          drawingBoard,
+        } = response.message;
+        setLocalGameState({
+          gameId,
+          host,
+          currentDrawer,
+          currentWord,
+          players,
+          gameState,
+          drawingBoard,
+        });
+        setLocalChatMessageState(chatMessages);
+      }
+      if (response.type === "game-error") {
+        alert(response.message);
+        resetLocalVars();
+        setLoading(false);
+        navigate("/");
+      }
+    };
+
+    window.addEventListener("beforeunload", () => {
+      if (newWs && newWs.readyState === WebSocket.OPEN) {
+        const closeMessage = {
+          type: "close",
+          message: {
+            gameId,
+            username,
+          },
+        };
+        newWs.send(JSON.stringify(closeMessage));
+        newWs.close();
+      }
+    });
+  };
 
   const joinRoomContext = (data: {
     username: string;
@@ -113,6 +198,15 @@ export function ConnectionContextProvider({ children }: Props) {
 
     newWs.onerror = (error) => {
       console.log("WebSocket Error: ", error);
+    };
+
+    newWs.onclose = () => {
+      console.log("Primary server has disconnected");
+      connectToServer(
+        (primary + 1) % servers.length,
+        data.gameId,
+        data.username
+      );
     };
 
     newWs.onmessage = (event) => {
