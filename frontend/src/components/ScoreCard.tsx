@@ -8,7 +8,7 @@ interface Props {
 }
 
 function ScoreCard(props: Props) {
-  const { localGameState } = useConnectionContext();
+  const { localGameState, username } = useConnectionContext();
 
   return (
     <div className="bg-white shadow-md p-4 flex gap-2 items-center">
@@ -17,13 +17,14 @@ function ScoreCard(props: Props) {
         <div className="flex flex-row space-x-2 font-sans">
           <div>
             {props.name}
+            {props.name === username && " (you)"}
           </div>
           <div className="flex flex-row space-x-2">
             {props.name === localGameState.host && (
               <img src="/star-solid.svg" width="15" height="15" />
             )}
             {props.name === localGameState.currentDrawer && (
-              <img src="/pencil-solid.svg" width="15" height="15"/>
+              <img src="/pencil-solid.svg" width="15" height="15" />
             )}
           </div>
         </div>
