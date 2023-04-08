@@ -143,7 +143,6 @@ function updateServers(gameId) {
                   score,
                   guesses,
                   guessedWordCorrectly,
-                  ws,
                 })
               ),
               gameState: gameRooms[gameId].gameState,
@@ -166,7 +165,6 @@ function getRandomWord() {
 }
 
 function newRound(args) {
-  // jacob
   // generate new word
   const randomWord = getRandomWord();
   // set current word to new word
