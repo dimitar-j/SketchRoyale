@@ -123,9 +123,11 @@ function updateServers(gameId) {
         };
         ws.onerror = (error) => {
           console.log(`WebSocket Error while connecting to ${server}: `, error);
+          servers[server] = null;
         };
         ws.onclose = () => {
           console.log(`socket connection to ${server} closed`);
+          servers[server] = null;
         };
       } else {
         if (ws && ws.readyState === WebSocket.OPEN) {
