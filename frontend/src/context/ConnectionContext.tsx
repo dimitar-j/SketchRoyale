@@ -164,7 +164,7 @@ export function ConnectionContextProvider({ children }: Props) {
   }) => {
     // connect to websocket
     // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
-    const newWs = new WebSocket("ws://136.159.5.25:8080");
+    const newWs = new WebSocket(servers[primary]);
     newWs.onopen = () => {
       setWs(newWs);
       setGameId(data.gameId);
