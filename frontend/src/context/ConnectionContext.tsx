@@ -73,9 +73,9 @@ export function ConnectionContextProvider({ children }: Props) {
   const [username, setUsername] = useState<String>("");
   const [primary, setPrimary] = useState(0);
   const servers = [
-    "ws://localhost:8080",
-    "ws://localhost:8081",
-    "ws://localhost:8082",
+    "ws://136.159.5.25:8080",
+    "ws://136.159.5.25:8081",
+    "ws://136.159.5.25:8082",
   ];
 
   const connectToServer = (index: number, gameId: string, username: string) => {
@@ -164,7 +164,7 @@ export function ConnectionContextProvider({ children }: Props) {
   }) => {
     // connect to websocket
     // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
-    const newWs = new WebSocket("ws://localhost:8080");
+    const newWs = new WebSocket("ws://136.159.5.25:8080");
     newWs.onopen = () => {
       setWs(newWs);
       setGameId(data.gameId);
