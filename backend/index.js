@@ -323,12 +323,12 @@ function handleChat(data, ws) {
       player.guesses -= 1;
       player.guessedWordCorrectly = correctGuess;
       if (correctGuess) {
-        player.guesses = 0;
         player.score += Math.floor(
           (1 / (gameRooms[data.message.gameId].chatMessages.length + 1)) *
             player.guesses *
             100
         );
+        player.guesses = 0;
       }
     }
     return player;
