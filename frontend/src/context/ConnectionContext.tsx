@@ -79,14 +79,13 @@ export function ConnectionContextProvider({ children }: Props) {
   ];
 
   const connectToServer = (index: number, gameId: string, username: string) => {
-    // connect to websocket
-    // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
+    // try to connect to new server
     const newWs = new WebSocket(servers[index]);
     console.log(`Attempting to connect to ${servers[index]}`);
     newWs.onopen = () => {
       setWs(newWs);
       setPrimary(index);
-
+      // on successful connection, send introduction message to new primary server
       const data = {
         type: "introduce",
         message: {
@@ -94,24 +93,25 @@ export function ConnectionContextProvider({ children }: Props) {
           username,
         },
       };
-      // send join message
-      console.log("data", data);
       newWs.send(JSON.stringify(data));
     };
 
     newWs.onerror = (error) => {
       console.log("WebSocket Error: ", error);
+      // if connection failed, try to connect to next server
       connectToServer((index + 1) % servers.length, gameId, username);
     };
 
     newWs.onclose = () => {
       console.log("Primary server has disconnected");
+      // if connection is closed, try to connect to next server
       connectToServer((index + 1) % servers.length, gameId, username);
     };
 
     newWs.onmessage = (event) => {
       const response = JSON.parse(event.data);
       console.log("Response received from WS: ", response);
+      // new player has joined
       if (response.type === "join-message") {
         const {
           gameId,
@@ -134,6 +134,7 @@ export function ConnectionContextProvider({ children }: Props) {
         });
         setLocalChatMessageState(chatMessages);
       }
+      // there has been an error in the game, navigate user back to home page
       if (response.type === "game-error") {
         alert(response.message);
         resetLocalVars();
@@ -143,6 +144,7 @@ export function ConnectionContextProvider({ children }: Props) {
     };
 
     window.addEventListener("beforeunload", () => {
+      // if user closes tab, send "close" message to server letting them know we are leaving
       if (newWs && newWs.readyState === WebSocket.OPEN) {
         const closeMessage = {
           type: "close",
@@ -152,6 +154,7 @@ export function ConnectionContextProvider({ children }: Props) {
           },
         };
         newWs.send(JSON.stringify(closeMessage));
+        // close connection to server
         newWs.close();
       }
     });
@@ -162,11 +165,11 @@ export function ConnectionContextProvider({ children }: Props) {
     gameId: string;
     type: string;
   }) => {
-    // connect to websocket
-    // const newWs = new WebSocket("wss://ws-server-2zwtarwoya-uw.a.run.app");
+    // connect to currently primary server
     const newWs = new WebSocket(servers[primary]);
     newWs.onopen = () => {
       setWs(newWs);
+      // save our game id and username in state for easy access when sending it in future messages to server
       setGameId(data.gameId);
       setUsername(data.username);
 
@@ -202,6 +205,7 @@ export function ConnectionContextProvider({ children }: Props) {
 
     newWs.onclose = () => {
       console.log("Primary server has disconnected");
+      // primary server has disconnected, elect a replica as primary by connecting to it
       connectToServer(
         (primary + 1) % servers.length,
         data.gameId,
@@ -212,6 +216,7 @@ export function ConnectionContextProvider({ children }: Props) {
     newWs.onmessage = (event) => {
       const response = JSON.parse(event.data);
       console.log("Response received from WS: ", response);
+      // new player has joined
       if (response.type === "join-message") {
         const {
           gameId,
@@ -234,6 +239,7 @@ export function ConnectionContextProvider({ children }: Props) {
         });
         setLocalChatMessageState(chatMessages);
       }
+      // there has been an error in the game, navigate user back to home page
       if (response.type === "game-error") {
         alert(response.message);
         resetLocalVars();
@@ -243,6 +249,7 @@ export function ConnectionContextProvider({ children }: Props) {
     };
 
     window.addEventListener("beforeunload", () => {
+      // if user closes tab, send "close" message to server letting them know we are leaving
       if (newWs && newWs.readyState === WebSocket.OPEN) {
         const closeMessage = {
           type: "close",
@@ -258,6 +265,7 @@ export function ConnectionContextProvider({ children }: Props) {
   };
 
   const startGame = () => {
+    // host has started the game
     if (ws && ws.readyState === WebSocket.OPEN) {
       const startMessage = {
         type: "start-game",
@@ -271,6 +279,7 @@ export function ConnectionContextProvider({ children }: Props) {
   };
 
   const drawerConfirmed = () => {
+    // drawer has confirmed their word
     console.log("host pressed confirm button");
     if (ws && ws.readyState === WebSocket.OPEN) {
       const confirmMessage = {
@@ -285,6 +294,7 @@ export function ConnectionContextProvider({ children }: Props) {
   };
 
   const sendDrawing = () => {
+    // send updated drawer to server
     console.log("sending drawing to server");
     if (ws && ws.readyState === WebSocket.OPEN) {
       const data = {
@@ -299,10 +309,12 @@ export function ConnectionContextProvider({ children }: Props) {
   };
 
   const handleDrawing = (drawing: Array<{ points: number[] }>) => {
+    // update the local game state of the drawing board for the drawer so they can see their drawing live
     setLocalGameState({ ...localGameState, drawingBoard: drawing });
   };
 
   const handleNewChat = (chat: string) => {
+    // send new chat to the server
     console.log("sending new chat to server", chat);
     if (ws && ws.readyState === WebSocket.OPEN) {
       const data = {

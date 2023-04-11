@@ -1,6 +1,6 @@
 var randomWords = require("random-words");
 const WebSocket = require("ws");
-const wss = new WebSocket.Server({ port: process.argv[2] || 8080 });
+const wss = new WebSocket.Server({ port: process.argv[2] || 8080 }); // receive port number as command line argument
 const fs = require("fs");
 // map all server URLs and their socket connections
 const servers = {
@@ -56,7 +56,7 @@ wss.on("connection", function connection(ws) {
 });
 
 function updateAllPlayers(gameId) {
-  // update all players
+  // update all players of new game state for their game
   gameRooms[gameId].players.map((curr_player) => {
     curr_player.ws.send(
       JSON.stringify({
@@ -81,7 +81,7 @@ function updateAllPlayers(gameId) {
       })
     );
   });
-  // update all replica servers
+  // update all replica servers to ensure they have up to date game state
   updateServers(gameId);
 }
 
@@ -122,10 +122,12 @@ function updateServers(gameId) {
           ws.send(JSON.stringify(data));
         };
         ws.onerror = (error) => {
+          // if server disconnects, remove their connection so that it can be remade once it comes back alive
           console.log(`WebSocket Error while connecting to ${server}: `, error);
           servers[server] = null;
         };
         ws.onclose = () => {
+          // if server disconnects, remove their connection so that it can be remade once it comes back alive
           console.log(`socket connection to ${server} closed`);
           servers[server] = null;
         };
@@ -161,6 +163,7 @@ function updateServers(gameId) {
 }
 
 function getRandomWord() {
+  // grab random word from word file
   const words = fs.readFileSync("words.txt", "utf-8").split(", ");
   const randomIndex = Math.floor(Math.random() * words.length);
   return words[randomIndex].slice(1, -1);
@@ -181,6 +184,7 @@ function newRound(args) {
 }
 
 function drawerConfirmWord(data, ws) {
+  // drawer has confirmed word, change game state to "game"
   gameRooms[data.message.gameId].gameState = "game";
   console.log("game state:", gameRooms[data.message.gameId].gameState);
   updateAllPlayers(data.message.gameId);
@@ -227,12 +231,12 @@ function endRound(args) {
 }
 
 function handleCreateRoom(data, ws) {
-  // gabe
   const gameId = data.message.gameId;
   const username = data.message.username;
 
   let roomData = gameRooms[gameId];
   if (!roomData) {
+    // if there is no data for room, create a new one
     gameRooms[gameId] = {
       host: username,
       currentDrawer: username,
@@ -243,6 +247,7 @@ function handleCreateRoom(data, ws) {
       chatMessages: [],
     };
   }
+  // add player to game room
   gameRooms[gameId].players.push({
     username: username,
     score: 0,
@@ -254,13 +259,14 @@ function handleCreateRoom(data, ws) {
 }
 
 function handleJoinRoom(data, ws) {
-  // jacob
   const gameId = data.message.gameId;
   const username = data.message.username;
 
   let roomData = gameRooms[gameId];
+  // check if game actually exists
   if (!roomData) {
     console.log("game id does not exist");
+    // if game doesn't exist, notify user
     ws.send(
       JSON.stringify({
         type: "game-error",
@@ -274,6 +280,7 @@ function handleJoinRoom(data, ws) {
     gameRooms[gameId].players.some((player) => player.username === username)
   ) {
     console.log("username taken");
+    // if username is taken, notify user
     ws.send(
       JSON.stringify({
         type: "game-error",
@@ -281,6 +288,7 @@ function handleJoinRoom(data, ws) {
       })
     );
   } else {
+    // if valid join request, add player to room
     gameRooms[gameId].players.push({
       username: username,
       score: 0,
@@ -293,7 +301,6 @@ function handleJoinRoom(data, ws) {
 }
 
 function handleStartGame(data, ws) {
-  // ajay
   // set currentDrawer to host
   gameRooms[data.message.gameId].currentDrawer =
     gameRooms[data.message.gameId].host;
@@ -306,7 +313,6 @@ function handleStartGame(data, ws) {
 }
 
 function handleChat(data, ws) {
-  // dimitar
   console.log("received chat", data.message.chat);
 
   // check if guess was correct
@@ -353,6 +359,7 @@ function handleChat(data, ws) {
   const gameOver =
     finishedPlayers === gameRooms[data.message.gameId].players.length - 1;
 
+  // end round if it is over
   if (gameOver) {
     console.log("ending game");
     endRound(data.message);
@@ -360,6 +367,7 @@ function handleChat(data, ws) {
 }
 
 function handleDraw(data, ws) {
+  // update drawind board
   console.log("handling draw", data);
   gameRooms[data.message.gameId].drawingBoard = data.message.drawing;
   updateAllPlayers(data.message.gameId);
